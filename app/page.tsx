@@ -1,5 +1,6 @@
-// @ts-nocheck // ignore eslint
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+import React from 'react';
 import Link from 'next/link';
 import { withAuth, getSignInUrl, getSignUpUrl, signOut } from '@workos-inc/authkit-nextjs';
 import { createClient } from '@/lib/supabase/server';

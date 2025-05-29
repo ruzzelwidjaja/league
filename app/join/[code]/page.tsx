@@ -1,3 +1,4 @@
+import React from 'react';
 import { redirect } from 'next/navigation';
 import { getSignUpUrl, withAuth } from '@workos-inc/authkit-nextjs';
 import { createClient } from '@/lib/supabase/server';

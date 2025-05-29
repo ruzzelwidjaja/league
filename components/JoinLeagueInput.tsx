@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -26,6 +27,7 @@ export default function JoinLeagueInput() {
         setError('Invalid league code. Please check and try again.');
       }
     } catch (err) {
+      console.error('Error checking league:', err);
       setError('Something went wrong. Please try again.');
     } finally {
       setIsChecking(false);

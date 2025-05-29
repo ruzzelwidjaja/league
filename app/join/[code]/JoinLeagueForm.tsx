@@ -1,8 +1,11 @@
 'use client';
 
+import React from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
 export default function JoinLeagueForm({ league, user }: { league: any, user: any }) {
   const [skillTier, setSkillTier] = useState('middle');
   const [isJoining, setIsJoining] = useState(false);

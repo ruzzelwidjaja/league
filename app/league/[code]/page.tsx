@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import React from 'react';
 import { withAuth, signOut } from '@workos-inc/authkit-nextjs';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -25,6 +28,9 @@ export default async function LeaguePage({
   
   if (!league) {
     return <div>League not found</div>;
+  }
+  if (leagueError) {
+    console.error('Error fetching league:', leagueError);
   }
 
   // Get user from database

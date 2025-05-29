@@ -1,10 +1,11 @@
-import { handleAuth, withAuth } from '@workos-inc/authkit-nextjs';
+import { handleAuth } from '@workos-inc/authkit-nextjs';
 import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 export const GET = handleAuth({
   returnPathname: '/',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onSuccess: async ({ user, accessToken, refreshToken }) => {
     const supabase = createClient();
     console.log('user-->', user);

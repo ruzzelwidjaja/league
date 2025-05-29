@@ -1,3 +1,4 @@
+import React from 'react';
 import { withAuth, signOut } from '@workos-inc/authkit-nextjs';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -72,7 +73,7 @@ export default async function DashboardPage() {
             ))}
           </div>
         ) : (
-          <p>You haven't joined any leagues yet.</p>
+          <p>You haven&apos;t joined any leagues yet.</p>
         )}
       </section>
     </main>
