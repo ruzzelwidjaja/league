@@ -26,7 +26,7 @@ export default async function JoinLeaguePage({
   
   if (!user) {
     const signUpUrl = await getSignUpUrl();
-    // TODO: Find a way to set cookie & redirect to signup url without having to click the button
+    // TODO: Find a way to set cookie & redirect to signup url without having to click the buttonn
     // Store the league code in a cookie for after auth
     // Create a hidden form that will be submitted automatically
     return (
