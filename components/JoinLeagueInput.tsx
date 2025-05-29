@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function JoinLeagueInput() {
-  const [code, setCode] = useState('');
-  const [error, setError] = useState('');
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
   const [isChecking, setIsChecking] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsChecking(true);
 
     try {
@@ -24,11 +24,11 @@ export default function JoinLeagueInput() {
         // League exists, redirect to join page
         router.push(`/join/${code}`);
       } else {
-        setError('Invalid league code. Please check and try again.');
+        setError("Invalid league code. Please check and try again.");
       }
     } catch (err) {
-      console.error('Error checking league:', err);
-      setError('Something went wrong. Please try again.');
+      console.error("Error checking league:", err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsChecking(false);
     }
@@ -46,17 +46,15 @@ export default function JoinLeagueInput() {
           required
           disabled={isChecking}
         />
-        {error && (
-          <p className="mt-2 text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </div>
-      
+
       <button
         type="submit"
         disabled={isChecking || !code.trim()}
         className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
       >
-        {isChecking ? 'Checking...' : 'Join League'}
+        {isChecking ? "Checking..." : "Join League"}
       </button>
     </form>
   );

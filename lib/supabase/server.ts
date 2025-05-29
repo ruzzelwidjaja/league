@@ -23,7 +23,6 @@ export async function createClient() {
             // user sessions.
           }
         },
-        
       },
     },
   );

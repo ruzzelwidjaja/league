@@ -1,14 +1,14 @@
-import React from 'react';
-import { redirect } from 'next/navigation';
-import { getSignUpUrl, withAuth } from '@workos-inc/authkit-nextjs';
-import { createClient } from '@/lib/supabase/server';
-import JoinLeagueForm from './JoinLeagueForm';
-import { setLeagueCodeAndRedirect } from './actions';
+import React from "react";
+import { redirect } from "next/navigation";
+import { getSignUpUrl, withAuth } from "@workos-inc/authkit-nextjs";
+import { createClient } from "@/lib/supabase/server";
+import JoinLeagueForm from "./JoinLeagueForm";
+import { setLeagueCodeAndRedirect } from "./actions";
 
-export default async function JoinLeaguePage({ 
-  params 
-}: { 
-  params: { code: string } 
+export default async function JoinLeaguePage({
+  params,
+}: {
+  params: { code: string };
 }) {
   const { code } = await params;
   const { user } = await withAuth();
@@ -16,15 +16,15 @@ export default async function JoinLeaguePage({
 
   // Check if league exists
   const { data: league } = await (await supabase)
-    .from('leagues')
-    .select('*')
-    .eq('join_code', code)
+    .from("leagues")
+    .select("*")
+    .eq("join_code", code)
     .single();
-  
+
   if (!league) {
     return <div>Invalid league code</div>;
   }
-  
+
   if (!user) {
     const signUpUrl = await getSignUpUrl();
     // TODO: Find a way to set cookie & redirect to signup url without having to click the buttonn
@@ -53,19 +53,19 @@ export default async function JoinLeaguePage({
     // await setLeagueCodeAndRedirect(formData);
     // redirect(signUpUrl);
   }
-  
+
   // User is authenticated, check if already in league
   const { data: membership } = await (await supabase)
-    .from('league_members')
-    .select('*')
-    .eq('league_id', league.id)
-    .eq('user_id', user.id)
+    .from("league_members")
+    .select("*")
+    .eq("league_id", league.id)
+    .eq("user_id", user.id)
     .single();
-  
+
   if (membership) {
     redirect(`/league/${code}`);
   }
-  
+
   // Show join confirmation page
-  return <JoinLeagueForm league={league} user={user} />;
+  return <JoinLeagueForm league={league} />;
 }
