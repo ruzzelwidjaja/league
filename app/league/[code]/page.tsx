@@ -12,7 +12,8 @@ export default async function LeaguePage({
 }) {
   const { code } = await params;
   const { user } = await withAuth({ ensureSignedIn: true });
-
+  console.log("IN LEAGUE PAGE");
+  console.log("user in league page-->", user);
   if (!user) {
     redirect("/");
   }

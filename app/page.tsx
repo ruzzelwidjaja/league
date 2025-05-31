@@ -14,17 +14,23 @@ import JoinLeagueInput from "@/components/JoinLeagueInput";
 
 export default async function HomePage() {
   const { user } = await withAuth();
+  console.log("user in root page-->", user);
 
   if (user) {
     // User is logged in, check if they're in a league
     const supabase = createClient();
 
     // Get user from database
-    const { data: dbUser } = await (await supabase)
+    const { data: dbUser, error: dbUserError } = await (await supabase)
       .from("users")
       .select("id")
       .eq("workos_user_id", user.id)
       .single();
+
+    if (dbUserError) {
+      console.error("Error fetching dbUser:", dbUserError);
+    }
+    console.log("dbUser in root page-->", dbUser);
 
     if (dbUser) {
       // Check if user is in any league
@@ -43,6 +49,9 @@ export default async function HomePage() {
         )
         .eq("user_id", dbUser.id)
         .single();
+      console.log("in root page, logged in");
+      console.log("dbUser in root page-->", dbUser);
+      console.log("membership in root page-->", membership);
 
       if (membership?.leagues) {
         // User is in a league, redirect to it

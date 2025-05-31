@@ -23,7 +23,7 @@ export default function JoinLeagueForm({ league }: { league: any }) {
     });
 
     if (response.ok) {
-      router.push(`/league/${league.id}`);
+      router.push(`/league/${league.join_code}`);
     }
   };
 
