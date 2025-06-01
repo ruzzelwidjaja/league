@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { createClient } from "@/lib/supabase/server";
 import { isValidPhoneNumber } from "libphonenumber-js";
+import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,13 +33,13 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient();
 
-    // Update user profile - store full international format
+    // Update user profile
     const { error } = await (await supabase)
       .from("users")
       .update({
         first_name: firstName.trim(),
         last_name: lastName.trim(),
-        phone_number: phoneNumber, // Store full international format
+        phone_number: phoneNumber,
         profile_completed: true,
         updated_at: new Date().toISOString(),
       })
@@ -52,7 +53,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true });
+    // Check for pending league code
+    const cookieStore = await cookies();
+    const pendingLeagueCode = cookieStore.get("pending_league_code");
+
+    let redirectTo = "/";
+    if (pendingLeagueCode?.value) {
+      redirectTo = `/join/${pendingLeagueCode.value}`;
+      // Clear the cookie now that we're using it
+      cookieStore.delete("pending_league_code");
+    }
+
+    return NextResponse.json({ success: true, redirectTo });
   } catch (error) {
     console.error("Error in complete-profile API:", error);
     return NextResponse.json(

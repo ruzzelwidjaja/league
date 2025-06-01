@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { handleAuth } from "@workos-inc/authkit-nextjs";
 import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
@@ -8,7 +7,17 @@ export async function GET(request: NextRequest) {
   const cookieStore = await cookies();
   const pendingLeagueCode = cookieStore.get("pending_league_code");
 
+  // Determine return path BEFORE calling handleAuth
+  let returnPath = "/";
+
+  // We need to check if the user will need to complete their profile
+  // But we can't check that until after auth, so we'll handle it differently
+  if (pendingLeagueCode?.value) {
+    returnPath = `/join/${pendingLeagueCode.value}`;
+  }
+
   return handleAuth({
+    returnPathname: returnPath, // This is the correct way to set the return path
     onSuccess: async ({ user }) => {
       const supabase = createClient();
 
@@ -25,26 +34,16 @@ export async function GET(request: NextRequest) {
           },
           {
             onConflict: "workos_user_id",
-          },
+          }
         )
         .select("id, profile_completed")
         .single();
 
-      // Check if profile is complete
-      if (!dbUser?.profile_completed) {
-        // Keep the pending league code for after profile completion
-        return { returnPathname: "/complete-profile" };
-      }
-
-      // Profile is complete, proceed with original logic
-      let returnPath = "/";
-      if (pendingLeagueCode?.value) {
-        returnPath = `/join/${pendingLeagueCode.value}`;
-        // Clear the cookie only when consuming it
+      // Don't clear the cookie here if profile is not completed
+      // We'll need it after they complete their profile
+      if (dbUser?.profile_completed && pendingLeagueCode) {
         cookieStore.delete("pending_league_code");
       }
-
-      return { returnPathname: returnPath };
     },
   })(request);
 }

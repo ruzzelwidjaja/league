@@ -135,7 +135,8 @@ export default function CompleteProfileForm({ user, existingData }: CompleteProf
       });
 
       if (response.ok) {
-        router.push("/"); // Redirect to home page
+        const data = await response.json();
+        router.push(data.redirectTo || "/");
       } else {
         const data = await response.json();
         setError(data.error || "Failed to update profile");
