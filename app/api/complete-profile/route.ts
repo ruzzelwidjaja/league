@@ -1,7 +1,7 @@
 // app/api/complete-profile/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@workos-inc/authkit-nextjs";
-import { createClient } from "@/lib/supabase/server";
+import { createUserQueries } from "@/lib/supabase/queries";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { cookies } from "next/headers";
 
@@ -31,22 +31,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient();
+    const userQueries = createUserQueries();
 
-    // Update user profile
-    const { error } = await (await supabase)
-      .from("users")
-      .update({
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        phone_number: phoneNumber,
-        profile_completed: true,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("workos_user_id", user.id);
+    // Update user profile using centralized query
+    const success = await userQueries.completeProfile(user.id, {
+      first_name: firstName.trim(),
+      last_name: lastName.trim(),
+      phone_number: phoneNumber,
+    });
 
-    if (error) {
-      console.error("Error updating user profile:", error);
+    if (!success) {
       return NextResponse.json(
         { error: "Failed to update profile" },
         { status: 500 }

@@ -1,7 +1,7 @@
 import React from "react";
 import { withAuth, signOut } from "@workos-inc/authkit-nextjs";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -11,32 +11,14 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
-  const supabase = createClient();
+  const userQueries = createUserQueries();
+  const leagueMemberQueries = createLeagueMemberQueries();
 
   // Get user's data from Supabase
-  const { data: dbUser } = await (await supabase)
-    .from("users")
-    .select("id")
-    .eq("workos_user_id", user.id)
-    .single();
+  const dbUser = await userQueries.getUserByWorkosId(user.id);
 
   // Get user's leagues
-  const { data: leagues } = await (
-    await supabase
-  )
-    .from("league_members")
-    .select(
-      `
-      league_id,
-      rank,
-      leagues (
-        id,
-        name,
-        join_code
-      )
-    `,
-    )
-    .eq("user_id", dbUser?.id);
+  const leagues = dbUser ? await leagueMemberQueries.getUserLeagues(dbUser.id) : [];
 
   return (
     <main className="min-h-screen p-8">
@@ -67,13 +49,13 @@ export default async function DashboardPage() {
             {leagues.map((membership) => (
               <Link
                 key={membership.league_id}
-                href={`/league/${membership.league_id}`}
+                href={`/league/${membership.leagues.join_code}`}
                 className="block border p-4 rounded hover:bg-gray-50"
               >
-                <h3 className="font-semibold">{membership.leagues[0]?.name}</h3>
+                <h3 className="font-semibold">{membership.leagues.name}</h3>
                 <p>Your rank: #{membership.rank}</p>
                 <p className="text-sm text-gray-500">
-                  Code: {membership.leagues[0]?.join_code}
+                  Code: {membership.leagues.join_code}
                 </p>
               </Link>
             ))}

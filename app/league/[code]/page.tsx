@@ -3,7 +3,7 @@
 import React from "react";
 import { withAuth, signOut } from "@workos-inc/authkit-nextjs";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createLeagueQueries, createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
 
 export default async function LeaguePage({
   params,
@@ -18,58 +18,29 @@ export default async function LeaguePage({
     redirect("/");
   }
 
-  const supabase = createClient();
+  const leagueQueries = createLeagueQueries();
+  const userQueries = createUserQueries();
+  const leagueMemberQueries = createLeagueMemberQueries();
 
   // Get league by code
-  const { data: league, error: leagueError } = await (await supabase)
-    .from("leagues")
-    .select("*")
-    .eq("join_code", code)
-    .single();
+  const league = await leagueQueries.getLeagueByCode(code);
 
   if (!league) {
     return <div>League not found</div>;
   }
-  if (leagueError) {
-    console.error("Error fetching league:", leagueError);
-  }
 
   // Get user from database
-  const { data: dbUser } = await (await supabase)
-    .from("users")
-    .select("id")
-    .eq("workos_user_id", user.id)
-    .single();
+  const dbUser = await userQueries.getUserByWorkosId(user.id);
 
   // Check if user is member
-  const { data: membership } = await (await supabase)
-    .from("league_members")
-    .select("*")
-    .eq("league_id", league.id)
-    .eq("user_id", dbUser?.id)
-    .single();
+  const isUserMember = dbUser ? await leagueMemberQueries.isUserInLeague(dbUser.id, league.id) : false;
 
-  if (!membership) {
+  if (!isUserMember) {
     redirect(`/join/${code}`);
   }
 
   // Get all members for ladder display
-  const { data: members } = await (
-    await supabase
-  )
-    .from("league_members")
-    .select(
-      `
-      *,
-      users (
-        email,
-        first_name,
-        last_name
-      )
-    `,
-    )
-    .eq("league_id", league.id)
-    .order("rank", { ascending: true });
+  const members = await leagueMemberQueries.getLeagueMembers(league.id);
 
   return (
     <main className="min-h-screen p-8">

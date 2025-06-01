@@ -1,7 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { getSignUpUrl, withAuth } from "@workos-inc/authkit-nextjs";
-import { createClient } from "@/lib/supabase/server";
+import { createLeagueQueries, createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
 import JoinLeagueForm from "./JoinLeagueForm";
 import { setLeagueCodeAndRedirect } from "./actions";
 
@@ -12,18 +12,13 @@ export default async function JoinLeaguePage({
 }) {
   const { code } = await params;
   const { user } = await withAuth();
-  const supabase = createClient();
+
+  const leagueQueries = createLeagueQueries();
+  const userQueries = createUserQueries();
+  const leagueMemberQueries = createLeagueMemberQueries();
 
   // Check if league exists
-  const { data: league, error: leagueError } = await (await supabase)
-    .from("leagues")
-    .select("*")
-    .eq("join_code", code)
-    .single();
-
-  if (leagueError) {
-    console.error("Error fetching league:", leagueError);
-  }
+  const league = await leagueQueries.getLeagueByCode(code);
 
   if (!league) {
     return <div>Invalid league code</div>;
@@ -58,15 +53,7 @@ export default async function JoinLeaguePage({
     // redirect(signUpUrl);
   }
 
-  const { data: dbUser, error: dbUserError } = await (await supabase)
-    .from("users")
-    .select("id, profile_completed")
-    .eq("workos_user_id", user.id)
-    .single();
-
-  if (dbUserError) {
-    console.error("Error fetching dbUser:", dbUserError);
-  }
+  const dbUser = await userQueries.getUserByWorkosId(user.id);
 
   if (!dbUser) {
     console.error("User not found in database");
@@ -78,15 +65,10 @@ export default async function JoinLeaguePage({
   }
 
   // User is authenticated, check if already in league
-  const { data: membership } = await (await supabase)
-    .from("league_members")
-    .select("*")
-    .eq("league_id", league.id)
-    .eq("user_id", dbUser?.id)
-    .single();
+  const isAlreadyMember = dbUser ? await leagueMemberQueries.isUserInLeague(dbUser.id, league.id) : false;
 
-  console.log("membership--->", membership);
-  if (membership) {
+  console.log("membership--->", isAlreadyMember);
+  if (isAlreadyMember) {
     redirect(`/league/${code}`);
   }
 

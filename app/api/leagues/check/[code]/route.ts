@@ -1,18 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createLeagueQueries } from "@/lib/supabase/queries";
 
 export async function GET(
   _request: NextRequest,
   context: { params: { code: string } },
 ) {
   const { code } = await context.params;
-  const supabase = createClient();
+  const leagueQueries = createLeagueQueries();
 
-  const { data: league } = await (await supabase)
-    .from("leagues")
-    .select("id")
-    .eq("join_code", code)
-    .single();
+  const exists = await leagueQueries.leagueExists(code);
 
-  return NextResponse.json({ exists: !!league });
+  return NextResponse.json({ exists });
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withAuth } from "@workos-inc/authkit-nextjs";
-import { createClient } from "@/lib/supabase/server";
+import { createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
 
 export async function POST(request: NextRequest) {
   const { user } = await withAuth({ ensureSignedIn: true });
@@ -10,35 +10,36 @@ export async function POST(request: NextRequest) {
   }
 
   const { leagueId, skillTier } = await request.json();
-  const supabase = createClient();
+
+  const userQueries = createUserQueries();
+  const leagueMemberQueries = createLeagueMemberQueries();
 
   // Get user from database
-  const { data: dbUser } = await (await supabase)
-    .from("users")
-    .select("id")
-    .eq("workos_user_id", user.id)
-    .single();
+  const dbUser = await userQueries.getUserByWorkosId(user.id);
 
   if (!dbUser) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  // Get current member count
-  const { count } = await (await supabase)
-    .from("league_members")
-    .select("*", { count: "exact", head: true })
-    .eq("league_id", leagueId);
+  // Check if user is already in the league
+  const isAlreadyMember = await leagueMemberQueries.isUserInLeague(dbUser.id, leagueId);
+  if (isAlreadyMember) {
+    return NextResponse.json({ error: "Already a member of this league" }, { status: 400 });
+  }
 
-  // Add user to league
-  const { error } = await (await supabase).from("league_members").insert({
-    league_id: leagueId,
-    user_id: dbUser.id,
-    rank: (count || 0) + 1,
-    skill_tier: skillTier,
-  });
+  // Add user to league using centralized query
+  const membership = await leagueMemberQueries.joinLeague(dbUser.id, leagueId, skillTier || 'bottom');
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+  if (!membership) {
+    return NextResponse.json({ error: "Failed to join league" }, { status: 500 });
+  }
+
+  // Update skill tier if provided
+  if (skillTier && skillTier !== 'bottom') {
+    const success = await leagueMemberQueries.updateMemberSkillTier(dbUser.id, leagueId, skillTier);
+    if (!success) {
+      console.error("Failed to update skill tier, but membership was created");
+    }
   }
 
   return NextResponse.json({ success: true });

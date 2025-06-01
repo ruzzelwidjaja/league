@@ -2,7 +2,7 @@
 import React from "react";
 import { withAuth, signOut } from "@workos-inc/authkit-nextjs";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createUserQueries } from "@/lib/supabase/queries";
 import CompleteProfileForm from "./CompleteProfileForm";
 
 export default async function CompleteProfilePage() {
@@ -12,14 +12,10 @@ export default async function CompleteProfilePage() {
     redirect("/");
   }
 
-  const supabase = createClient();
+  const userQueries = createUserQueries();
 
   // Get user from database to check if profile is already complete
-  const { data: dbUser } = await (await supabase)
-    .from("users")
-    .select("profile_completed, first_name, last_name, phone_number")
-    .eq("workos_user_id", user.id)
-    .single();
+  const dbUser = await userQueries.getUserByWorkosId(user.id);
 
   // If profile is already complete, redirect to home
   if (dbUser?.profile_completed) {
@@ -36,9 +32,9 @@ export default async function CompleteProfilePage() {
 
   // Transform existing data to match the expected props format
   const existingData = dbUser ? {
-    first_name: dbUser.first_name,
-    last_name: dbUser.last_name,
-    phone_number: dbUser.phone_number
+    first_name: dbUser.first_name || undefined,
+    last_name: dbUser.last_name || undefined,
+    phone_number: dbUser.phone_number || undefined
   } : undefined;
 
   return (

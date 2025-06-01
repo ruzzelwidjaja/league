@@ -7,7 +7,7 @@ import {
   getSignUpUrl,
   signOut,
 } from "@workos-inc/authkit-nextjs";
-import { createClient } from "@/lib/supabase/server";
+import { createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
 import { redirect } from "next/navigation";
 import JoinLeagueInput from "@/components/JoinLeagueInput";
 
@@ -17,17 +17,13 @@ export default async function HomePage() {
 
   if (user) {
     // User is logged in, check if they're in a league
-    const supabase = createClient();
+    const userQueries = createUserQueries();
 
     // Get user from database
-    const { data: dbUser, error: dbUserError } = await (await supabase)
-      .from("users")
-      .select("id, profile_completed")
-      .eq("workos_user_id", user.id)
-      .single();
+    const dbUser = await userQueries.getUserByWorkosId(user.id);
 
-    if (dbUserError) {
-      console.error("Error fetching dbUser:", dbUserError);
+    if (!dbUser) {
+      console.error("Error fetching dbUser: User not found");
     }
     console.log("dbUser in root page-->", dbUser);
 
@@ -38,21 +34,8 @@ export default async function HomePage() {
 
     if (dbUser) {
       // Check if user is in any league
-      const { data: membership } = await (
-        await supabase
-      )
-        .from("league_members")
-        .select(
-          `
-          league_id,
-          leagues (
-            id,
-            join_code
-          )
-        `,
-        )
-        .eq("user_id", dbUser.id)
-        .single();
+      const leagueMemberQueries = createLeagueMemberQueries();
+      const membership = await leagueMemberQueries.getUserFirstLeague(dbUser.id);
       console.log("in root page, logged in");
       console.log("dbUser in root page-->", dbUser);
       console.log("membership in root page-->", membership);

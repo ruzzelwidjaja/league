@@ -1,5 +1,5 @@
 import { handleAuth } from "@workos-inc/authkit-nextjs";
-import { createClient } from "@/lib/supabase/server";
+import { createUserQueries } from "@/lib/supabase/queries";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
@@ -19,25 +19,14 @@ export async function GET(request: NextRequest) {
   return handleAuth({
     returnPathname: returnPath, // This is the correct way to set the return path
     onSuccess: async ({ user }) => {
-      const supabase = createClient();
-
-      // Sync user with Supabase
-      const { data: dbUser } = await (await supabase)
-        .from("users")
-        .upsert(
-          {
-            workos_user_id: user.id,
-            email: user.email,
-            first_name: user.firstName,
-            last_name: user.lastName,
-            updated_at: new Date().toISOString(),
-          },
-          {
-            onConflict: "workos_user_id",
-          }
-        )
-        .select("id, profile_completed")
-        .single();
+      // Sync user with Supabase using centralized query
+      const userQueries = createUserQueries();
+      const dbUser = await userQueries.upsertUser({
+        workos_user_id: user.id,
+        email: user.email,
+        first_name: user.firstName || undefined,
+        last_name: user.lastName || undefined,
+      });
 
       // Don't clear the cookie here if profile is not completed
       // We'll need it after they complete their profile
