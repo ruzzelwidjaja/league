@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import React from "react";
 import Link from "next/link";
@@ -23,7 +22,7 @@ export default async function HomePage() {
     // Get user from database
     const { data: dbUser, error: dbUserError } = await (await supabase)
       .from("users")
-      .select("id")
+      .select("id, profile_completed")
       .eq("workos_user_id", user.id)
       .single();
 
@@ -31,6 +30,11 @@ export default async function HomePage() {
       console.error("Error fetching dbUser:", dbUserError);
     }
     console.log("dbUser in root page-->", dbUser);
+
+    // Check if profile is completed - redirect if not
+    if (dbUser && !dbUser.profile_completed) {
+      redirect("/complete-profile");
+    }
 
     if (dbUser) {
       // Check if user is in any league

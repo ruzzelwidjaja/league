@@ -60,7 +60,7 @@ export default async function JoinLeaguePage({
 
   const { data: dbUser, error: dbUserError } = await (await supabase)
     .from("users")
-    .select("id")
+    .select("id, profile_completed")
     .eq("workos_user_id", user.id)
     .single();
 
@@ -70,6 +70,11 @@ export default async function JoinLeaguePage({
 
   if (!dbUser) {
     console.error("User not found in database");
+  }
+
+  // Check if profile is completed - redirect if not
+  if (dbUser && !dbUser.profile_completed) {
+    redirect("/complete-profile");
   }
 
   // User is authenticated, check if already in league
