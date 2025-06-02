@@ -1,47 +1,22 @@
-export interface User {
-  id: string;
-  workos_user_id: string;
-  email: string;
-  first_name: string | null;
-  last_name: string | null;
-  phone_number: string | null;
-  profile_completed: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import type { Tables, TablesInsert, TablesUpdate } from './database.types';
 
-export interface League {
-  id: string;
-  name: string;
-  description: string | null;
-  join_code: string;
-  season_start: string; // DATE type
-  season_end: string; // DATE type
-  created_by: string | null; // UUID reference to users(id)
-  created_at: string;
-}
+// Use generated types as base types
+export type User = Tables<'users'>;
+export type League = Tables<'leagues'>;
+export type LeagueMember = Tables<'league_members'>;
+export type Challenge = Tables<'challenges'>;
 
-export interface LeagueMember {
-  id: string;
-  league_id: string;
-  user_id: string;
-  rank: number;
-  skill_tier: 'top' | 'middle' | 'bottom';
-  status: 'active' | 'out_of_town' | 'inactive';
-  joined_at: string;
-}
+// Insert and Update types for form handling
+export type UserInsert = TablesInsert<'users'>;
+export type UserUpdate = TablesUpdate<'users'>;
+export type LeagueInsert = TablesInsert<'leagues'>;
+export type LeagueUpdate = TablesUpdate<'leagues'>;
+export type LeagueMemberInsert = TablesInsert<'league_members'>;
+export type LeagueMemberUpdate = TablesUpdate<'league_members'>;
+export type ChallengeInsert = TablesInsert<'challenges'>;
+export type ChallengeUpdate = TablesUpdate<'challenges'>;
 
-export interface Challenge {
-  id: string;
-  league_id: string;
-  challenger_id: string;
-  challenged_id: string;
-  status: 'pending' | 'accepted' | 'completed' | 'rejected' | 'expired';
-  winner_id: string | null;
-  created_at: string;
-  completed_at: string | null;
-}
-
+// Custom joined types for queries with relationships
 export interface LeagueMemberWithUser extends LeagueMember {
   users: Pick<User, 'email' | 'first_name' | 'last_name'>;
 }

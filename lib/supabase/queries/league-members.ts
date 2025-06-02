@@ -27,7 +27,7 @@ export class LeagueMemberQueries {
       return [];
     }
 
-    return data || [];
+    return (data as LeagueMemberWithLeague[]) || [];
   }
 
   async getUserFirstLeague(userId: string): Promise<LeagueMemberWithLeague | null> {
@@ -47,7 +47,7 @@ export class LeagueMemberQueries {
       return null;
     }
 
-    return data;
+    return data as LeagueMemberWithLeague | null;
   }
 
   async getLeagueMembers(leagueId: string): Promise<LeagueMemberWithUser[]> {
@@ -69,7 +69,7 @@ export class LeagueMemberQueries {
       return [];
     }
 
-    return data || [];
+    return (data as LeagueMemberWithUser[]) || [];
   }
 
   async isUserInLeague(userId: string, leagueId: string): Promise<boolean> {
