@@ -141,7 +141,7 @@ export default function CompleteProfileForm({ user, existingData }: CompleteProf
         const data = await response.json();
         setError(data.error || "Failed to update profile");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to update profile. Please try again.");
     } finally {
       setIsSubmitting(false);

@@ -1,5 +1,6 @@
 import { createClient as createServerClient } from '../server';
 import type { Challenge, ChallengeWithUsers } from '../types';
+import { Json } from "../database.types";
 
 export class ChallengeQueries {
   private supabase: ReturnType<typeof createServerClient>;
@@ -227,7 +228,7 @@ export class ChallengeQueries {
 
   async submitMatchScore(
     challengeId: string,
-    scores: Record<string, any>,
+    scores: Json,
     submittedBy: string
   ): Promise<boolean> {
     const { error } = await (await this.supabase)

@@ -8,7 +8,7 @@ import { setLeagueCodeAndRedirect } from "./actions";
 export default async function JoinLeaguePage({
   params,
 }: {
-  params: { code: string };
+  params: Promise<{ code: string }>;
 }) {
   const { code } = await params;
   const { user } = await withAuth();

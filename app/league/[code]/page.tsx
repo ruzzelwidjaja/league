@@ -8,7 +8,7 @@ import { createLeagueQueries, createUserQueries, createLeagueMemberQueries } fro
 export default async function LeaguePage({
   params,
 }: {
-  params: { code: string };
+  params: Promise<{ code: string }>;
 }) {
   const { code } = await params;
   const { user } = await withAuth({ ensureSignedIn: true });

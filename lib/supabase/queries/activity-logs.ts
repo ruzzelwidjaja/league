@@ -1,5 +1,6 @@
 import { createClient as createServerClient } from '../server';
 import type { ActivityLog, ActivityLogInsert } from '../types';
+import { Json } from "../database.types";
 
 export class ActivityLogQueries {
   private supabase: ReturnType<typeof createServerClient>;
@@ -131,7 +132,7 @@ export class ActivityLogQueries {
     leagueId: string,
     challengerId: string,
     challengedId: string,
-    metadata?: Record<string, any>
+    metadata?: Json
   ): Promise<boolean> {
     const result = await this.logActivity({
       league_id: leagueId,
@@ -148,7 +149,7 @@ export class ActivityLogQueries {
     leagueId: string,
     challengedId: string,
     challengerId: string,
-    metadata?: Record<string, any>
+    metadata?: Json
   ): Promise<boolean> {
     const result = await this.logActivity({
       league_id: leagueId,
@@ -165,7 +166,7 @@ export class ActivityLogQueries {
     leagueId: string,
     challengedId: string,
     challengerId: string,
-    metadata?: Record<string, any>
+    metadata?: Json
   ): Promise<boolean> {
     const result = await this.logActivity({
       league_id: leagueId,
@@ -182,7 +183,7 @@ export class ActivityLogQueries {
     leagueId: string,
     winnerId: string,
     loserId: string,
-    metadata?: Record<string, any>
+    metadata?: Json
   ): Promise<boolean> {
     const result = await this.logActivity({
       league_id: leagueId,
@@ -199,7 +200,7 @@ export class ActivityLogQueries {
     leagueId: string,
     userId: string,
     relatedUserId: string,
-    metadata?: Record<string, any>
+    metadata?: Json
   ): Promise<boolean> {
     const result = await this.logActivity({
       league_id: leagueId,
@@ -215,7 +216,7 @@ export class ActivityLogQueries {
   async logUserJoinedLeague(
     leagueId: string,
     userId: string,
-    metadata?: Record<string, any>
+    metadata?: Json
   ): Promise<boolean> {
     const result = await this.logActivity({
       league_id: leagueId,
@@ -231,7 +232,7 @@ export class ActivityLogQueries {
   async logUserWentOutOfTown(
     leagueId: string,
     userId: string,
-    metadata?: Record<string, any>
+    metadata?: Json
   ): Promise<boolean> {
     const result = await this.logActivity({
       league_id: leagueId,
@@ -247,7 +248,7 @@ export class ActivityLogQueries {
   async logUserReturnedFromOutOfTown(
     leagueId: string,
     userId: string,
-    metadata?: Record<string, any>
+    metadata?: Json
   ): Promise<boolean> {
     const result = await this.logActivity({
       league_id: leagueId,
