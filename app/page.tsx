@@ -8,6 +8,9 @@ import {
 } from "@workos-inc/authkit-nextjs";
 import { createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
 import { redirect } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import { PiPingPongFill } from "react-icons/pi";
 import JoinLeagueInput from "@/components/JoinLeagueInput";
 
 export default async function HomePage() {
@@ -84,32 +87,54 @@ export default async function HomePage() {
   const signUpUrl = await getSignUpUrl();
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-8">
-      <div className="max-w-md w-full text-center">
-        <h1 className="text-5xl font-bold mb-4">League Ladder</h1>
-        <p className="text-xl text-gray-600 mb-8">
-          Compete. Challenge. Climb the ranks.
-        </p>
-        <p className="mb-8 text-gray-500">
-          Join your workplace ping pong league and track your progress up the
-          competitive ladder.
+    <main className="relative overflow-hidden px-6 py-8 min-h-screen flex items-center">
+      <div className="mx-auto max-w-4xl w-full">
+        {/* Logo */}
+        <div className="mb-8">
+          <PiPingPongFill className="w-8 h-8 text-neutral-600" />
+        </div>
+
+        {/* Main heading */}
+        <h1 className="mb-6 text-4xl font-medium tracking-tight text-neutral-800 sm:text-5xl">
+          Ping Pong League
+          <span className="text-neutral-500 text-2xl sm:text-3xl font-normal ml-1"> @WeWork</span>
+        </h1>
+
+        {/* Description */}
+        <p className="mb-10 max-w-lg text-lg text-neutral-600 leading-relaxed">
+          A simple ladder system for ping pong enthusiasts.
+          Challenge colleagues and track your progress.
         </p>
 
-        <div className="flex gap-4 justify-center">
-          <Link
-            href={signInUrl}
-            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition"
+        {/* Action buttons */}
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <Button
+            asChild
+            size="lg"
+            className="group px-8 py-4 text-base font-medium transition-all duration-300"
           >
-            Sign In
-          </Link>
-          <Link
-            href={signUpUrl}
-            className="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-900 transition"
+            <Link href={signUpUrl}>
+              Join the League
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </Button>
+
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="px-8 py-4 text-base font-medium border border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 transition-all duration-300"
           >
-            Sign Up
-          </Link>
+            <Link href={signInUrl}>
+              Already a Player?
+            </Link>
+          </Button>
         </div>
       </div>
+
+      {/* Subtle background decoration */}
+      <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-gradient-to-br from-neutral-100/40 to-stone-100/40 blur-3xl"></div>
+      <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-gradient-to-br from-stone-100/40 to-neutral-100/40 blur-3xl"></div>
     </main>
   );
 }
