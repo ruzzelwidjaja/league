@@ -20,6 +20,9 @@ importers:
       '@types/styled-components':
         specifier: ^5.1.34
         version: 5.1.34
+      '@vercel/analytics':
+        specifier: ^1.5.0
+        version: 1.5.0(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
       '@workos-inc/authkit-nextjs':
         specifier: ^2.3.3
         version: 2.3.3(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -799,6 +802,32 @@ packages:
     resolution: {integrity: sha512-/1kM+r9G86s0ZLk2ej0MuU3hJQGmnawAA1JPIhcVMkZCtxK/pJzNtzPms3vDwVxbbwho6ExRcVLoA4h0zwzVmA==}
     cpu: [x64]
     os: [win32]
+
+  '@vercel/analytics@1.5.0':
+    resolution: {integrity: sha512-MYsBzfPki4gthY5HnYN7jgInhAZ7Ac1cYDoRWFomwGHWEX7odTEzbtg9kf/QSo7XEsEAqlQugA6gJ2WS2DEa3g==}
+    peerDependencies:
+      '@remix-run/react': ^2
+      '@sveltejs/kit': ^1 || ^2
+      next: '>= 13'
+      react: ^18 || ^19 || ^19.0.0-rc
+      svelte: '>= 4'
+      vue: ^3
+      vue-router: ^4
+    peerDependenciesMeta:
+      '@remix-run/react':
+        optional: true
+      '@sveltejs/kit':
+        optional: true
+      next:
+        optional: true
+      react:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+      vue-router:
+        optional: true
 
   '@workos-inc/authkit-nextjs@2.3.3':
     resolution: {integrity: sha512-Oa9GGMch3eV1JUjgdnacuY8QnyN5gSLtIidMmqzIdWRLe374UMy/YReHKh+pUk6+QeSDjMS8PZDlEIiteVcSAA==}
@@ -2894,6 +2923,11 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.7.6':
     optional: true
+
+  '@vercel/analytics@1.5.0(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)':
+    optionalDependencies:
+      next: 15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react: 19.1.0
 
   '@workos-inc/authkit-nextjs@2.3.3(next@15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
