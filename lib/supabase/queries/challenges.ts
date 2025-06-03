@@ -28,19 +28,19 @@ export class ChallengeQueries {
       .from('challenges')
       .select(`
         *,
-        challenger:challenger_id (
+        challenger:users!challenges_challenger_id_fkey (
           id,
           first_name,
           last_name,
           email
         ),
-        challenged:challenged_id (
+        challenged:users!challenges_challenged_id_fkey (
           id,
           first_name,
           last_name,
           email
         ),
-        winner:winner_id (
+        winner:users!challenges_winner_id_fkey (
           id,
           first_name,
           last_name,
@@ -63,19 +63,19 @@ export class ChallengeQueries {
       .from('challenges')
       .select(`
         *,
-        challenger:challenger_id (
+        challenger:users!challenges_challenger_id_fkey (
           id,
           first_name,
           last_name,
           email
         ),
-        challenged:challenged_id (
+        challenged:users!challenges_challenged_id_fkey (
           id,
           first_name,
           last_name,
           email
         ),
-        winner:winner_id (
+        winner:users!challenges_winner_id_fkey (
           id,
           first_name,
           last_name,
@@ -98,19 +98,19 @@ export class ChallengeQueries {
       .from('challenges')
       .select(`
         *,
-        challenger:challenger_id (
+        challenger:users!challenges_challenger_id_fkey (
           id,
           first_name,
           last_name,
           email
         ),
-        challenged:challenged_id (
+        challenged:users!challenges_challenged_id_fkey (
           id,
           first_name,
           last_name,
           email
         ),
-        winner:winner_id (
+        winner:users!challenges_winner_id_fkey (
           id,
           first_name,
           last_name,
@@ -153,7 +153,7 @@ export class ChallengeQueries {
 
   async updateChallengeStatus(
     challengeId: string,
-    status: 'pending' | 'accepted' | 'completed' | 'rejected' | 'expired'
+    status: 'pending' | 'accepted' | 'completed' | 'rejected' | 'expired' | 'withdrawn'
   ): Promise<boolean> {
     const { error } = await (await this.supabase)
       .from('challenges')
@@ -162,6 +162,45 @@ export class ChallengeQueries {
 
     if (error) {
       console.error('Error updating challenge status:', error);
+      return false;
+    }
+
+    return true;
+  }
+
+  async acceptChallenge(challengeId: string): Promise<boolean> {
+    const { error } = await (await this.supabase)
+      .from('challenges')
+      .update({
+        status: 'accepted' as const,
+        accepted_at: new Date().toISOString(),
+        responded_at: new Date().toISOString(),
+      })
+      .eq('id', challengeId);
+
+    if (error) {
+      console.error('Error accepting challenge:', error);
+      return false;
+    }
+
+    return true;
+  }
+
+  async rejectChallenge(
+    challengeId: string,
+    reason: 'declined' | 'rank_difference'
+  ): Promise<boolean> {
+    const { error } = await (await this.supabase)
+      .from('challenges')
+      .update({
+        status: 'rejected' as const,
+        rejection_reason: reason,
+        responded_at: new Date().toISOString(),
+      })
+      .eq('id', challengeId);
+
+    if (error) {
+      console.error('Error rejecting challenge:', error);
       return false;
     }
 
@@ -180,6 +219,28 @@ export class ChallengeQueries {
 
     if (error) {
       console.error('Error completing challenge:', error);
+      return false;
+    }
+
+    return true;
+  }
+
+  async submitMatchScore(
+    challengeId: string,
+    scores: Record<string, any>,
+    submittedBy: string
+  ): Promise<boolean> {
+    const { error } = await (await this.supabase)
+      .from('challenges')
+      .update({
+        match_scores: scores,
+        score_submitted_by: submittedBy,
+        score_submitted_at: new Date().toISOString(),
+      })
+      .eq('id', challengeId);
+
+    if (error) {
+      console.error('Error submitting match score:', error);
       return false;
     }
 

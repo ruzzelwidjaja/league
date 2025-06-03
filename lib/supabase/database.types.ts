@@ -17,9 +17,9 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
+          operationName?: string
           variables?: Json
           extensions?: Json
-          operationName?: string
           query?: string
         }
         Returns: Json
@@ -34,34 +34,110 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          league_id: string | null
+          metadata: Json | null
+          related_user_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          league_id?: string | null
+          metadata?: Json | null
+          related_user_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          league_id?: string | null
+          metadata?: Json | null
+          related_user_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_logs_related_user_id_fkey"
+            columns: ["related_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenges: {
         Row: {
+          accepted_at: string | null
           challenged_id: string | null
           challenger_id: string | null
           completed_at: string | null
           created_at: string | null
           id: string
           league_id: string | null
+          match_scores: Json | null
+          proposed_slots: Json | null
+          rejection_reason: string | null
+          responded_at: string | null
+          score_submitted_at: string | null
+          score_submitted_by: string | null
+          selected_slot: string | null
           status: string | null
           winner_id: string | null
         }
         Insert: {
+          accepted_at?: string | null
           challenged_id?: string | null
           challenger_id?: string | null
           completed_at?: string | null
           created_at?: string | null
           id?: string
           league_id?: string | null
+          match_scores?: Json | null
+          proposed_slots?: Json | null
+          rejection_reason?: string | null
+          responded_at?: string | null
+          score_submitted_at?: string | null
+          score_submitted_by?: string | null
+          selected_slot?: string | null
           status?: string | null
           winner_id?: string | null
         }
         Update: {
+          accepted_at?: string | null
           challenged_id?: string | null
           challenger_id?: string | null
           completed_at?: string | null
           created_at?: string | null
           id?: string
           league_id?: string | null
+          match_scores?: Json | null
+          proposed_slots?: Json | null
+          rejection_reason?: string | null
+          responded_at?: string | null
+          score_submitted_at?: string | null
+          score_submitted_by?: string | null
+          selected_slot?: string | null
           status?: string | null
           winner_id?: string | null
         }
@@ -88,6 +164,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "challenges_score_submitted_by_fkey"
+            columns: ["score_submitted_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "challenges_winner_id_fkey"
             columns: ["winner_id"]
             isOneToOne: false
@@ -98,28 +181,40 @@ export type Database = {
       }
       league_members: {
         Row: {
+          activity_window_start: string | null
           id: string
           joined_at: string | null
           league_id: string | null
+          previous_rank: number | null
           rank: number
+          recent_acceptances: number | null
+          recent_rejections: number | null
           skill_tier: string
           status: string | null
           user_id: string | null
         }
         Insert: {
+          activity_window_start?: string | null
           id?: string
           joined_at?: string | null
           league_id?: string | null
+          previous_rank?: number | null
           rank: number
+          recent_acceptances?: number | null
+          recent_rejections?: number | null
           skill_tier: string
           status?: string | null
           user_id?: string | null
         }
         Update: {
+          activity_window_start?: string | null
           id?: string
           joined_at?: string | null
           league_id?: string | null
+          previous_rank?: number | null
           rank?: number
+          recent_acceptances?: number | null
+          recent_rejections?: number | null
           skill_tier?: string
           status?: string | null
           user_id?: string | null
@@ -176,6 +271,48 @@ export type Database = {
           {
             foreignKeyName: "leagues_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      out_of_town_periods: {
+        Row: {
+          created_at: string | null
+          end_date: string
+          id: string
+          league_id: string | null
+          start_date: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          end_date: string
+          id?: string
+          league_id?: string | null
+          start_date: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          league_id?: string | null
+          start_date?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "out_of_town_periods_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "out_of_town_periods_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
