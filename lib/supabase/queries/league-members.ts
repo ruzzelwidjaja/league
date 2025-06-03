@@ -58,11 +58,13 @@ export class LeagueMemberQueries {
         users (
           email,
           first_name,
-          last_name
+          last_name,
+          profile_picture_url,
+          organization_name
         )
       `)
       .eq('league_id', leagueId)
-      .order('rank', { ascending: true });
+      .order('joined_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching league members:', error);

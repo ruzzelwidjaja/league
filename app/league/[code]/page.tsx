@@ -4,6 +4,8 @@ import React from "react";
 import { withAuth, signOut } from "@workos-inc/authkit-nextjs";
 import { redirect } from "next/navigation";
 import { createLeagueQueries, createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export default async function LeaguePage({
   params,
@@ -12,8 +14,7 @@ export default async function LeaguePage({
 }) {
   const { code } = await params;
   const { user } = await withAuth({ ensureSignedIn: true });
-  console.log("IN LEAGUE PAGE");
-  console.log("user in league page-->", user);
+
   if (!user) {
     redirect("/");
   }
@@ -39,16 +40,35 @@ export default async function LeaguePage({
     redirect(`/join/${code}`);
   }
 
-  // Get all members for ladder display
+  // Get all members for display
   const members = await leagueMemberQueries.getLeagueMembers(league.id);
 
+  const formatJoinDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const getInitials = (firstName?: string | null, lastName?: string | null) => {
+    if (firstName && lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    }
+    if (firstName) {
+      return firstName.charAt(0).toUpperCase();
+    }
+    return "U";
+  };
+
   return (
-    <main className="min-h-screen p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
+    <main className="min-h-screen p-6">
+      <div className="max-w-3xl mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold">{league.name}</h1>
-            <p className="text-gray-600">League Code: {league.join_code}</p>
+            <h1 className="text-2xl font-semibold text-gray-900">{league.name}</h1>
+            <p className="text-sm text-gray-500 mt-1">Code: {league.join_code} • {members?.length || 0} players</p>
           </div>
           <form
             action={async () => {
@@ -56,45 +76,65 @@ export default async function LeaguePage({
               await signOut();
             }}
           >
-            <button
-              type="submit"
-              className="bg-red-500 text-white px-4 py-2 rounded"
-            >
+            <Button variant="outline" size="sm" type="submit">
               Sign Out
-            </button>
+            </Button>
           </form>
         </div>
 
-        <div className="bg-white rounded-lg shadow">
-          <h2 className="text-xl font-semibold p-4 border-b">
-            Current Rankings
-          </h2>
-          <div className="divide-y">
+        {/* Players List */}
+        <div>
+          <div className="mb-4">
+            <h2 className="font-medium text-gray-900">Players</h2>
+          </div>
+          <div className="divide-y divide-gray-100">
             {members?.map((member: any) => (
               <div
                 key={member.id}
-                className="p-4 flex items-center justify-between"
+                className="py-4 flex items-center justify-between"
               >
-                <div className="flex items-center gap-4">
-                  <span className="text-2xl font-bold text-gray-400">
-                    #{member.rank}
-                  </span>
-                  <div>
-                    <p className="font-semibold">
-                      {member.users?.first_name} {member.users?.last_name}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {member.users?.email}
-                    </p>
+                <div className="flex items-center gap-3">
+                  <Avatar className="size-10">
+                    <AvatarImage
+                      src={member.users?.profile_picture_url}
+                      alt={`${member.users?.first_name} ${member.users?.last_name}`}
+                    />
+                    <AvatarFallback className="text-xs font-medium bg-primary text-primary-foreground">
+                      {getInitials(member.users?.first_name, member.users?.last_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {member.users?.first_name} {member.users?.last_name}
+                      </p>
+                      {member.user_id === dbUser?.id && (
+                        <div className="bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-medium">
+                          You
+                        </div>
+                      )}
+                    </div>
+                    {member.users?.organization_name && (
+                      <p className="text-xs text-gray-500 mt-0.5 truncate">
+                        {member.users.organization_name}
+                      </p>
+                    )}
                   </div>
                 </div>
-                {member.user_id === dbUser?.id && (
-                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded text-sm">
-                    You
-                  </span>
-                )}
+                <div className="text-right">
+                  <p className="text-xs text-gray-500">
+                    Joined {member.joined_at ? formatJoinDate(member.joined_at) : 'Recently'}
+                  </p>
+                </div>
               </div>
             ))}
+
+            {(!members || members.length === 0) && (
+              <div className="py-8 text-center text-gray-500">
+                <p>No players have joined yet.</p>
+                <p className="text-sm mt-1">Share the league code to get started!</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
