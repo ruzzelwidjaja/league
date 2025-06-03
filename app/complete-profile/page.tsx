@@ -62,7 +62,7 @@ export default async function CompleteProfilePage() {
             "use server";
             await signOut();
           }}
-          className="mt-8 text-center"
+          className="mt-4 text-center"
         >
           <button
             type="submit"

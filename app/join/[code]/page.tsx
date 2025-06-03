@@ -2,6 +2,8 @@ import React from "react";
 import { redirect } from "next/navigation";
 import { getSignUpUrl, withAuth } from "@workos-inc/authkit-nextjs";
 import { createLeagueQueries, createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
+import { Button } from "@/components/ui/button";
+import { HiOutlineMail } from "react-icons/hi";
 import JoinLeagueForm from "./JoinLeagueForm";
 import { setLeagueCodeAndRedirect } from "./actions";
 
@@ -26,31 +28,48 @@ export default async function JoinLeaguePage({
 
   if (!user) {
     const signUpUrl = await getSignUpUrl();
-    // TODO: Find a way to set cookie & redirect to signup url without having to click the buttonn
-    // Store the league code in a cookie for after auth
-    // Create a hidden form that will be submitted automatically
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <p className="mb-4">Please sign in to join this league</p>
+      <main className="min-h-screen flex items-center justify-center p-8">
+        <div className="max-w-md w-full text-center">
+          {/* Mail Icon */}
+          <div className="mb-8">
+            <HiOutlineMail className="w-14 h-14 text-neutral-500 mx-auto" />
+          </div>
+
+          {/* Heading */}
+          <h1 className="text-3xl font-bold mb-4 text-neutral-800">
+            You&apos;re Invited!
+          </h1>
+
+          {/* Description */}
+          <p className="text-lg text-neutral-600 mb-2">
+            Join the <span className="font-semibold">WeWork Ping Pong League</span>
+          </p>
+          <p className="text-neutral-500 mb-8 leading-relaxed">
+            Challenge your colleagues, climb the rankings, and become the office ping pong champion.
+            Create your account to get started.
+          </p>
+
+          {/* Sign Up Button */}
           <form action={setLeagueCodeAndRedirect}>
             <input type="hidden" name="code" value={code} />
             <input type="hidden" name="redirectUrl" value={signUpUrl} />
-            <button
+            <Button
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded"
+              size="lg"
+              className="w-full px-8 py-4 text-base font-medium"
             >
               Sign Up to Join
-            </button>
+            </Button>
           </form>
+
+          {/* League Info */}
+          <p className="text-sm text-neutral-400 mt-6">
+            League code: <span className="font-mono text-neutral-600">{code}</span>
+          </p>
         </div>
-      </div>
+      </main>
     );
-    // const formData = new FormData();
-    // formData.append('code', code);
-    // formData.append('redirectUrl', signUpUrl);
-    // await setLeagueCodeAndRedirect(formData);
-    // redirect(signUpUrl);
   }
 
   const dbUser = await userQueries.getUserByWorkosId(user.id);
