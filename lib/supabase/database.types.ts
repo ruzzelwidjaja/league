@@ -321,6 +321,7 @@ export type Database = {
       }
       users: {
         Row: {
+          availability: Json | null
           created_at: string | null
           email: string
           first_name: string | null
@@ -333,6 +334,7 @@ export type Database = {
           workos_user_id: string
         }
         Insert: {
+          availability?: Json | null
           created_at?: string | null
           email: string
           first_name?: string | null
@@ -345,6 +347,7 @@ export type Database = {
           workos_user_id: string
         }
         Update: {
+          availability?: Json | null
           created_at?: string | null
           email?: string
           first_name?: string | null

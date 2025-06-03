@@ -1,5 +1,6 @@
 import { createClient as createServerClient } from '../server';
-import type { User } from '../types';
+import type { User, UserAvailability } from '../types';
+import type { Json } from '../database.types';
 
 export class UserQueries {
   private supabase: ReturnType<typeof createServerClient>;
@@ -114,6 +115,22 @@ export class UserQueries {
 
     if (error) {
       console.error('Error completing profile:', error);
+      return false;
+    }
+
+    return true;
+  }
+
+  async updateUserAvailability(userId: string, availability: UserAvailability): Promise<boolean> {
+    const { error } = await (await this.supabase)
+      .from('users')
+      .update({
+        availability: availability as Json,
+      })
+      .eq('id', userId);
+
+    if (error) {
+      console.error('Error updating user availability:', error);
       return false;
     }
 

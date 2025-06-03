@@ -34,4 +34,28 @@ export interface ChallengeWithUsers extends Challenge {
   challenger: Pick<User, 'id' | 'first_name' | 'last_name' | 'email'> | null;
   challenged: Pick<User, 'id' | 'first_name' | 'last_name' | 'email'> | null;
   winner?: Pick<User, 'id' | 'first_name' | 'last_name' | 'email'> | null;
+}
+
+// User availability schedule type for the availability JSONB column
+export interface UserAvailability {
+  monday?: {
+    lunch?: boolean;
+    after_work?: boolean;
+  };
+  tuesday?: {
+    lunch?: boolean;
+    after_work?: boolean;
+  };
+  wednesday?: {
+    lunch?: boolean;
+    after_work?: boolean;
+  };
+  thursday?: {
+    lunch?: boolean;
+    after_work?: boolean;
+  };
+  friday?: {
+    lunch?: boolean;
+    after_work?: boolean;
+  };
 } 

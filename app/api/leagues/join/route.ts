@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { leagueId, skillTier } = await request.json();
+  const { leagueId, skillTier, availability } = await request.json();
 
   const userQueries = createUserQueries();
   const leagueMemberQueries = createLeagueMemberQueries();
@@ -25,6 +25,14 @@ export async function POST(request: NextRequest) {
   const isAlreadyMember = await leagueMemberQueries.isUserInLeague(dbUser.id, leagueId);
   if (isAlreadyMember) {
     return NextResponse.json({ error: "Already a member of this league" }, { status: 400 });
+  }
+
+  // Update user availability if provided
+  if (availability) {
+    const success = await userQueries.updateUserAvailability(dbUser.id, availability);
+    if (!success) {
+      console.error("Failed to update user availability");
+    }
   }
 
   // Add user to league using centralized query

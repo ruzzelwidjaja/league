@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { getSignUpUrl, withAuth } from "@workos-inc/authkit-nextjs";
 import { createLeagueQueries, createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
 import { Button } from "@/components/ui/button";
-import { HiOutlineMail } from "react-icons/hi";
 import { HiOutlineQrCode } from "react-icons/hi2";
 import JoinLeagueForm from "./JoinLeagueForm";
 import { setLeagueCodeAndRedirect } from "./actions";
