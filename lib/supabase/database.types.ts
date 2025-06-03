@@ -326,6 +326,7 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          organization_name: string | null
           phone_number: string | null
           profile_completed: boolean | null
           updated_at: string | null
@@ -337,6 +338,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          organization_name?: string | null
           phone_number?: string | null
           profile_completed?: boolean | null
           updated_at?: string | null
@@ -348,6 +350,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          organization_name?: string | null
           phone_number?: string | null
           profile_completed?: boolean | null
           updated_at?: string | null

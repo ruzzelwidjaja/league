@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { firstName, lastName, phoneNumber } = await request.json();
+    const { firstName, lastName, organizationName, phoneNumber } = await request.json();
 
     // Validate required fields
     if (!firstName?.trim() || !lastName?.trim() || !phoneNumber?.trim()) {
@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
       first_name: firstName.trim(),
       last_name: lastName.trim(),
       phone_number: phoneNumber,
+      organization_name: organizationName?.trim() || null,
     });
 
     if (!success) {

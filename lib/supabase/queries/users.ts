@@ -101,6 +101,7 @@ export class UserQueries {
       first_name: string;
       last_name: string;
       phone_number: string;
+      organization_name?: string | null;
     }
   ): Promise<boolean> {
     const { error } = await (await this.supabase)

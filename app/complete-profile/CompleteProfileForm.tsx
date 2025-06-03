@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import PhoneInput from "react-phone-number-input";
 import styled from "styled-components";
 import "react-phone-number-input/style.css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const StyledPhoneInputWrapper = styled.div<{ $hasError: boolean }>`
   .PhoneInput {
@@ -67,12 +70,14 @@ interface CompleteProfileFormProps {
     first_name?: string;
     last_name?: string;
     phone_number?: string;
+    organization_name?: string;
   };
 }
 
 export default function CompleteProfileForm({ user, existingData }: CompleteProfileFormProps) {
   const [firstName, setFirstName] = useState(existingData?.first_name || user.firstName || "");
   const [lastName, setLastName] = useState(existingData?.last_name || user.lastName || "");
+  const [organizationName, setOrganizationName] = useState(existingData?.organization_name || "");
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>(
     existingData?.phone_number || undefined
   );
@@ -130,6 +135,7 @@ export default function CompleteProfileForm({ user, existingData }: CompleteProf
         body: JSON.stringify({
           firstName: firstName.trim(),
           lastName: lastName.trim(),
+          organizationName: organizationName.trim() || null,
           phoneNumber: phoneNumber, // Send full international format
         }),
       });
@@ -156,51 +162,58 @@ export default function CompleteProfileForm({ user, existingData }: CompleteProf
         </div>
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Email Address
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="email">Email Address</Label>
+        <Input
+          id="email"
           type="email"
           value={user.email}
           disabled
-          className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
+          className="bg-gray-50 text-gray-500"
         />
-        <p className="text-xs text-gray-500 mt-1">This cannot be changed</p>
+        <p className="text-xs text-gray-500">This cannot be changed</p>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          First Name
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="firstName">First Name</Label>
+        <Input
+          id="firstName"
           type="text"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
           required
-          className="w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           placeholder="Enter your first name"
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Last Name
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="lastName">Last Name</Label>
+        <Input
+          id="lastName"
           type="text"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
           required
-          className="w-full p-3 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           placeholder="Enter your last name"
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Phone Number
-        </label>
+      <div className="space-y-2">
+        <Label htmlFor="organizationName">Organization Name (Optional)</Label>
+        <Input
+          id="organizationName"
+          type="text"
+          value={organizationName}
+          onChange={(e) => setOrganizationName(e.target.value)}
+          placeholder="Enter your organization name"
+        />
+        <p className="text-xs text-gray-500">
+          Company, school, or team you&apos;re representing
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="phoneNumber">Phone Number</Label>
         <StyledPhoneInputWrapper $hasError={phoneError}>
           <PhoneInput
             international
@@ -217,18 +230,19 @@ export default function CompleteProfileForm({ user, existingData }: CompleteProf
             placeholder="Enter phone number"
           />
         </StyledPhoneInputWrapper>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-gray-500">
           This number can be used by other players in the league for match coordination
         </p>
       </div>
 
-      <button
+      <Button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full"
+        size="lg"
       >
         {isSubmitting ? "Completing Profile..." : "Complete Profile"}
-      </button>
+      </Button>
     </form>
   );
 }

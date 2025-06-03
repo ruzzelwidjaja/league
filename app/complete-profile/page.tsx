@@ -3,6 +3,7 @@ import React from "react";
 import { withAuth, signOut } from "@workos-inc/authkit-nextjs";
 import { redirect } from "next/navigation";
 import { createUserQueries } from "@/lib/supabase/queries";
+import { LuUser } from "react-icons/lu";
 import CompleteProfileForm from "./CompleteProfileForm";
 
 export default async function CompleteProfilePage() {
@@ -34,13 +35,17 @@ export default async function CompleteProfilePage() {
   const existingData = dbUser ? {
     first_name: dbUser.first_name || undefined,
     last_name: dbUser.last_name || undefined,
-    phone_number: dbUser.phone_number || undefined
+    phone_number: dbUser.phone_number || undefined,
+    organization_name: dbUser.organization_name || undefined
   } : undefined;
 
   return (
     <main className="min-h-screen flex items-center justify-center p-8">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <LuUser className="h-12 w-12 text-[#C0A891]" />
+          </div>
           <h1 className="text-3xl font-bold mb-2">Complete Your Profile</h1>
           <p className="text-gray-600">
             Just a few more details to get you started!
