@@ -3,7 +3,7 @@ import { createLeagueQueries } from "@/lib/supabase/queries";
 
 export async function GET(
   _request: NextRequest,
-  context: { params: { code: string } },
+  context: { params: Promise<{ code: string }> },
 ) {
   const { code } = await context.params;
   const leagueQueries = createLeagueQueries();

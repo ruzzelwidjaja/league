@@ -22,7 +22,7 @@ export default defineConfig([
       // prettier: pluginPrettier,
     },
     rules: {
-      "prettier/prettier": "error",
+      // "prettier/prettier": "error",
       "space-before-blocks": "off",
       "space-before-function-paren": "off",
       "space-in-parens": "off",
