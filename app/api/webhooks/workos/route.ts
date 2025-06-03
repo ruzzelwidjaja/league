@@ -25,6 +25,7 @@ export async function POST(request: Request) {
         email: event.data.email,
         first_name: event.data.first_name,
         last_name: event.data.last_name,
+        profile_picture_url: event.data.profilePictureUrl,
         updated_at: new Date().toISOString(),
       });
       break;

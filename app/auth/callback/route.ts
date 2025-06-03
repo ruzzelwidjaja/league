@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
         email: user.email,
         first_name: user.firstName || undefined,
         last_name: user.lastName || undefined,
+        profile_picture_url: user.profilePictureUrl || undefined,
       });
 
       // Don't clear the cookie here if profile is not completed

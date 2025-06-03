@@ -46,6 +46,7 @@ export class UserQueries {
     last_name?: string;
     phone_number?: string;
     profile_completed?: boolean;
+    profile_picture_url?: string;
   }): Promise<User | null> {
     const { data, error } = await (await this.supabase)
       .from('users')
