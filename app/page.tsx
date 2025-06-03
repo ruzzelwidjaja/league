@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { PiPingPongFill } from "react-icons/pi";
+import { HiHashtag } from "react-icons/hi";
 import JoinLeagueInput from "@/components/JoinLeagueInput";
 
 export default async function HomePage() {
@@ -52,23 +53,37 @@ export default async function HomePage() {
     return (
       <main className="min-h-screen flex items-center justify-center p-8">
         <div className="max-w-md w-full">
+          {/* Hash Icon */}
+          <div className="mb-8 text-center">
+            <HiHashtag className="w-14 h-14 text-neutral-500 mx-auto" />
+          </div>
+
+          {/* Heading */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-2">
-              Welcome to League Ladder
+            <h1 className="text-3xl font-bold mb-2 text-neutral-800">
+              Enter League Code
             </h1>
-            <p className="text-gray-600">
-              Hey {user.email}! Enter your league code to join.
+            <p className="text-neutral-600">
+              Enter the code provided by your league administrator
             </p>
           </div>
 
           <JoinLeagueInput />
+
+          {/* Info Box */}
+          <div className="mt-8 p-4 bg-neutral-50 border border-neutral-200 rounded-lg">
+            <p className="text-sm text-neutral-600 leading-relaxed">
+              <span className="font-medium">Don&apos;t have a code?</span><br />
+              Visit the front desk at WeWork or scan the QR code posted in the building&apos;s ping pong area to get your league access code.
+            </p>
+          </div>
 
           <form
             action={async () => {
               "use server";
               await signOut();
             }}
-            className="mt-8 text-center"
+            className="mt-6 text-center"
           >
             <button
               type="submit"

@@ -4,6 +4,7 @@ import { getSignUpUrl, withAuth } from "@workos-inc/authkit-nextjs";
 import { createLeagueQueries, createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
 import { Button } from "@/components/ui/button";
 import { HiOutlineMail } from "react-icons/hi";
+import { HiOutlineQrCode } from "react-icons/hi2";
 import JoinLeagueForm from "./JoinLeagueForm";
 import { setLeagueCodeAndRedirect } from "./actions";
 
@@ -33,7 +34,7 @@ export default async function JoinLeaguePage({
         <div className="max-w-md w-full text-center">
           {/* Mail Icon */}
           <div className="mb-8">
-            <HiOutlineMail className="w-14 h-14 text-neutral-500 mx-auto" />
+            <HiOutlineQrCode className="w-14 h-14 text-neutral-500 mx-auto" />
           </div>
 
           {/* Heading */}
