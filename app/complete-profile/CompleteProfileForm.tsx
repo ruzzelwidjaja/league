@@ -9,6 +9,7 @@ import "react-phone-number-input/style.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 const StyledPhoneInputWrapper = styled.div<{ $hasError: boolean }>`
   .PhoneInput {
@@ -234,6 +235,19 @@ export default function CompleteProfileForm({ user, existingData }: CompleteProf
           This number can be used by other players in the league for match coordination
         </p>
       </div>
+
+      <blockquote className="mt-6 border-l-2 pl-4 text-xs">
+        <p>
+          By completing your profile, you agree to our{" "}
+          <Link
+            href="/privacy"
+            className="text-primary hover:underline font-medium"
+          >
+            Privacy Policy
+          </Link>
+          . Your information will be shared with other league members to facilitate match coordination.
+        </p>
+      </blockquote>
 
       <Button
         type="submit"

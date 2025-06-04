@@ -51,7 +51,7 @@ export default async function HomePage() {
 
     // User is logged in but not in a league
     return (
-      <main className="min-h-screen flex items-center justify-center p-8">
+      <main className="min-h-svh flex items-center justify-center p-8">
         <div className="max-w-md w-full">
           {/* Hash Icon */}
           <div className="mb-8 text-center">
@@ -102,7 +102,7 @@ export default async function HomePage() {
   const signUpUrl = await getSignUpUrl();
 
   return (
-    <main className="relative overflow-hidden px-6 py-8 min-h-screen flex items-center">
+    <main className="relative overflow-hidden px-6 py-8 min-h-svh flex items-center">
       <div className="mx-auto max-w-4xl w-full">
         {/* Logo */}
         <div className="mb-8">
