@@ -17,17 +17,17 @@ export default function JoinLeagueForm({ league }: { league: League }) {
   const levels = [
     {
       id: "top",
-      title: "Top Third",
-      description: "Experienced player, confident in advanced techniques",
+      title: "Experienced",
+      description: "Experienced player who can handle some spins and serves",
     },
     {
       id: "middle",
-      title: "Middle Third",
+      title: "Intermediate",
       description: "Intermediate player, comfortable with basic rallies",
     },
     {
       id: "bottom",
-      title: "Bottom Third",
+      title: "Beginner",
       description: "Beginner or casual player, still learning",
     },
   ];

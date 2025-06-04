@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createLeagueQueries, createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { InfoBox } from "@/components/ui/info-box";
 
 export default async function LeaguePage({
   params,
@@ -82,9 +83,13 @@ export default async function LeaguePage({
           </form>
         </div>
 
+        <InfoBox className="mb-8 text-sm text-muted-foreground p-4">
+          We are currently registering players. You will receive an email once the league is ready to start.
+        </InfoBox>
+
         {/* Players List */}
         <div>
-          <div className="mb-4">
+          <div className="mb-3">
             <h2 className="font-medium text-gray-900">Players</h2>
           </div>
           <div className="divide-y divide-gray-100">

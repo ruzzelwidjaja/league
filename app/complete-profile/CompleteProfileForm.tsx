@@ -15,16 +15,21 @@ const StyledPhoneInputWrapper = styled.div<{ $hasError: boolean }>`
   .PhoneInput {
     display: flex;
     align-items: center;
-    border: 1px solid ${props => props.$hasError ? 'rgb(239, 68, 68)' : 'rgb(209, 213, 219)'};
-    border-radius: 0.375rem;
+    border: 1px solid ${props => props.$hasError ? 'var(--destructive)' : 'var(--border)'};
+    border-radius: var(--radius);
     padding: 0.75rem;
-    background-color: white;
+    background-color: transparent;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    ::selection {
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+    }
   }
 
   .PhoneInput:focus-within {
-    border-color: ${props => props.$hasError ? 'rgb(239, 68, 68)' : 'rgb(59, 130, 246)'};
-    box-shadow: 0 0 0 1px ${props => props.$hasError ? 'rgb(239, 68, 68)' : 'rgb(59, 130, 246)'};
+    border-color: ${props => props.$hasError ? 'var(--destructive)' : 'var(--ring)'};
+    box-shadow: 0 0 0 1px ${props => props.$hasError ? 'var(--destructive)' : 'var(--ring)'};
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   }
 
   .PhoneInputCountry {

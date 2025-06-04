@@ -13,6 +13,7 @@ import { ArrowRight } from "lucide-react";
 import { PiPingPongFill } from "react-icons/pi";
 import { HiHashtag } from "react-icons/hi";
 import JoinLeagueInput from "@/components/JoinLeagueInput";
+import { InfoBox } from "@/components/ui/info-box";
 
 export default async function HomePage() {
   const { user } = await withAuth();
@@ -71,12 +72,9 @@ export default async function HomePage() {
           <JoinLeagueInput />
 
           {/* Info Box */}
-          <div className="mt-8 p-4 bg-neutral-50 border border-neutral-200 rounded-lg">
-            <p className="text-sm text-neutral-600 leading-relaxed">
-              <span className="font-medium">Don&apos;t have a code?</span><br />
-              Visit the front desk at WeWork or scan the QR code posted in the building&apos;s ping pong area to get your league access code.
-            </p>
-          </div>
+          <InfoBox title="Don't have a code?" className="mt-8">
+            Visit the front desk at WeWork or scan the QR code posted in the building&apos;s ping pong area to get your league access code.
+          </InfoBox>
 
           <form
             action={async () => {
