@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React from "react";
-import { withAuth, signOut } from "@workos-inc/authkit-nextjs";
+import { withAuth } from "@workos-inc/authkit-nextjs";
 import { redirect } from "next/navigation";
 import { createLeagueQueries, createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { InfoBox } from "@/components/ui/info-box";
+import UserDropdown from "./UserDropdown";
 
 export default async function LeaguePage({
   params,
@@ -71,16 +71,9 @@ export default async function LeaguePage({
             <h1 className="text-2xl font-semibold text-gray-900">{league.name}</h1>
             <p className="text-sm text-gray-500 mt-1">Code: {league.join_code} • {members?.length || 0} players</p>
           </div>
-          <form
-            action={async () => {
-              "use server";
-              await signOut();
-            }}
-          >
-            <Button variant="outline" size="sm" type="submit">
-              Sign Out
-            </Button>
-          </form>
+          <div>
+            {dbUser && <UserDropdown user={user} dbUser={dbUser} />}
+          </div>
         </div>
 
         <InfoBox className="mb-8 text-sm text-muted-foreground p-4">
