@@ -14,6 +14,7 @@ import { PiPingPongFill } from "react-icons/pi";
 import { HiHashtag } from "react-icons/hi";
 import JoinLeagueInput from "@/components/JoinLeagueInput";
 import { InfoBox } from "@/components/ui/info-box";
+import * as motion from "motion/react-client";
 
 export default async function HomePage() {
   const { user } = await withAuth();
@@ -95,59 +96,131 @@ export default async function HomePage() {
     );
   }
 
-  // User is not logged in - show landing page
+  // User is not logged in - show landing page with animations
   const signInUrl = await getSignInUrl();
   const signUpUrl = await getSignUpUrl();
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: {
+      opacity: 0,
+      y: -20,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: [0.25, 0.46, 0.45, 0.94] // Custom cubic-bezier for smooth easing
+      }
+    }
+  };
+
+  const buttonVariants = {
+    hidden: {
+      opacity: 0,
+      y: -20,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: [0.25, 0.46, 0.45, 0.94],
+        delay: 0.1
+      }
+    }
+  };
+
   return (
-    <main className="relative overflow-hidden px-6 py-8 min-h-svh flex items-center">
+    <motion.main
+      className="relative overflow-hidden px-6 py-8 min-h-svh flex items-center"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       <div className="mx-auto max-w-4xl w-full">
         {/* Logo */}
-        <div className="mb-8">
+        <motion.div className="mb-8" variants={itemVariants}>
           <PiPingPongFill className="w-8 h-8 text-neutral-600" />
-        </div>
+        </motion.div>
 
         {/* Main heading */}
-        <h1 className="mb-6 text-4xl font-medium tracking-tight text-neutral-800 sm:text-5xl">
+        <motion.h1
+          className="mb-6 text-4xl font-medium tracking-tight text-neutral-800 sm:text-5xl"
+          variants={itemVariants}
+        >
           Ping Pong League
           <span className="text-neutral-500 text-2xl sm:text-3xl font-normal ml-1"> @WeWork</span>
-        </h1>
+        </motion.h1>
 
         {/* Description */}
-        <p className="mb-10 max-w-lg text-lg text-neutral-600 leading-relaxed">
+        <motion.p
+          className="mb-10 max-w-lg text-lg text-neutral-600 leading-relaxed"
+          variants={itemVariants}
+        >
           A simple ladder system for ping pong enthusiasts.
           Challenge colleagues and track your progress.
-        </p>
+        </motion.p>
 
         {/* Action buttons */}
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <Button
-            asChild
-            size="lg"
-            className="group px-8 py-4 text-base font-medium transition-all duration-300"
-          >
-            <Link href={signUpUrl}>
-              Join the League
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </Button>
+        <motion.div
+          className="flex flex-col gap-4 sm:flex-row"
+          variants={containerVariants}
+        >
+          <motion.div variants={buttonVariants}>
+            <Button
+              asChild
+              size="lg"
+              className="group px-8 py-4 text-base font-medium transition-all duration-300"
+            >
+              <Link href={signUpUrl}>
+                Join the League
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </Button>
+          </motion.div>
 
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-            className="px-8 py-4 text-base font-medium border border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 transition-all duration-300"
-          >
-            <Link href={signInUrl}>
-              Already a Player?
-            </Link>
-          </Button>
-        </div>
+          <motion.div variants={buttonVariants}>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="px-8 py-4 text-base font-medium border border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 transition-all duration-300"
+            >
+              <Link href={signInUrl}>
+                Already a Player?
+              </Link>
+            </Button>
+          </motion.div>
+        </motion.div>
       </div>
 
-      {/* Subtle background decoration */}
-      <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-gradient-to-br from-neutral-100/40 to-stone-100/40 blur-3xl"></div>
-      <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-gradient-to-br from-stone-100/40 to-neutral-100/40 blur-3xl"></div>
-    </main>
+      {/* Subtle background decoration with delayed fade-in */}
+      <motion.div
+        className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-gradient-to-br from-neutral-100/40 to-stone-100/40 blur-3xl"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.5, delay: 0.8, ease: "easeOut" }}
+      />
+      <motion.div
+        className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-gradient-to-br from-stone-100/40 to-neutral-100/40 blur-3xl"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.5, delay: 1.0, ease: "easeOut" }}
+      />
+    </motion.main>
   );
 }
