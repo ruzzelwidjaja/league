@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Target, Clock } from "lucide-react";
 import type { League } from "@/lib/supabase/types";
 import type { UserAvailability } from "@/lib/supabase/types";
+import { motion } from "motion/react";
 
 export default function JoinLeagueForm({ league }: { league: League }) {
   const [selectedLevel, setSelectedLevel] = useState<string>("");
@@ -93,7 +94,15 @@ export default function JoinLeagueForm({ league }: { league: League }) {
 
   return (
     <div className="min-h-screen bg-background p-6 mt-10">
-      <div className="max-w-2xl mx-auto">
+      <motion.div
+        className="max-w-2xl mx-auto"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.6,
+          ease: [0.25, 0.46, 0.45, 0.94]
+        }}
+      >
         <div className="space-y-8">
           <div className="text-center">
             <h1 className="text-3xl font-semibold text-foreground mb-4">Join {league.name}</h1>
@@ -180,7 +189,7 @@ export default function JoinLeagueForm({ league }: { league: League }) {
             {isJoining ? "Joining..." : "Complete Registration"}
           </Button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

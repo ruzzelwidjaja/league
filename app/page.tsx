@@ -54,7 +54,15 @@ export default async function HomePage() {
     // User is logged in but not in a league
     return (
       <main className="min-h-svh flex items-center justify-center p-8">
-        <div className="max-w-md w-full">
+        <motion.div
+          className="max-w-md w-full"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.6,
+            ease: [0.25, 0.46, 0.45, 0.94]
+          }}
+        >
           {/* Hash Icon */}
           <div className="mb-8 text-center">
             <HiHashtag className="w-14 h-14 text-neutral-500 mx-auto" />
@@ -91,7 +99,7 @@ export default async function HomePage() {
               Sign Out
             </button>
           </form>
-        </div>
+        </motion.div>
       </main>
     );
   }
@@ -184,7 +192,7 @@ export default async function HomePage() {
             <Button
               asChild
               size="lg"
-              className="group px-8 py-4 text-base font-medium transition-all duration-300"
+              className="group px-8 py-4 text-base font-medium transition-all duration-300 w-full sm:w-auto"
             >
               <Link href={signUpUrl}>
                 Join the League
@@ -198,7 +206,7 @@ export default async function HomePage() {
               asChild
               variant="outline"
               size="lg"
-              className="px-8 py-4 text-base font-medium border border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 transition-all duration-300"
+              className="px-8 py-4 text-base font-medium border border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 transition-all duration-300 w-full sm:w-auto"
             >
               <Link href={signInUrl}>
                 Already a Player?

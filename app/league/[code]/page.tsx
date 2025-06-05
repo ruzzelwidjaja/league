@@ -7,6 +7,7 @@ import { createLeagueQueries, createUserQueries, createLeagueMemberQueries } fro
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { InfoBox } from "@/components/ui/info-box";
 import UserDropdown from "./UserDropdown";
+import * as motion from "motion/react-client";
 
 export default async function LeaguePage({
   params,
@@ -62,26 +63,63 @@ export default async function LeaguePage({
     return "U";
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.25,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: {
+      opacity: 0,
+      y: -20,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.4,
+        ease: [0.25, 0.46, 0.45, 0.94]
+      }
+    }
+  };
+
   return (
-    <main className="min-h-screen p-6">
+    <motion.main
+      className="min-h-screen p-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <motion.div
+          className="flex justify-between items-start mb-6 gap-4"
+          variants={itemVariants}
+        >
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">{league.name}</h1>
             <p className="text-sm text-gray-500 mt-1">Code: {league.join_code} • {members?.length || 0} players</p>
           </div>
-          <div>
+          <div className="mt-2">
             {dbUser && <UserDropdown user={user} dbUser={dbUser} />}
           </div>
-        </div>
+        </motion.div>
 
-        <InfoBox className="mb-8 text-sm text-muted-foreground p-4">
-          We are currently registering players. You will receive an email once the league is ready to start.
-        </InfoBox>
+        {/* Info Box */}
+        <motion.div variants={itemVariants}>
+          <InfoBox className="mb-8 text-sm text-muted-foreground p-4">
+            We are currently registering players. You will receive an email once the league is ready to start.
+          </InfoBox>
+        </motion.div>
 
         {/* Players List */}
-        <div>
+        <motion.div variants={itemVariants}>
           <div className="mb-3">
             <h2 className="font-medium text-gray-900">Players</h2>
           </div>
@@ -134,8 +172,8 @@ export default async function LeaguePage({
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
-    </main>
+    </motion.main>
   );
 }

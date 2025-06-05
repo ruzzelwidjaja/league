@@ -44,7 +44,7 @@ export default function UserDropdown({ user, dbUser }: UserDropdownProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center">
-          <Avatar className="size-10">
+          <Avatar className="size-8">
             <AvatarImage
               src={displayProfilePicture || undefined}
               alt={`${displayFirstName} ${displayLastName}`}

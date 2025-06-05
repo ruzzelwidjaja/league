@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { HiOutlineQrCode } from "react-icons/hi2";
 import JoinLeagueForm from "./JoinLeagueForm";
 import { setLeagueCodeAndRedirect } from "./actions";
+import * as motion from "motion/react-client";
 
 export default async function JoinLeaguePage({
   params,
@@ -30,7 +31,15 @@ export default async function JoinLeaguePage({
     const signUpUrl = await getSignUpUrl();
     return (
       <main className="min-h-screen flex items-center justify-center p-8">
-        <div className="max-w-md w-full text-center">
+        <motion.div
+          className="max-w-md w-full text-center"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.6,
+            ease: [0.25, 0.46, 0.45, 0.94]
+          }}
+        >
           {/* Mail Icon */}
           <div className="mb-8">
             <HiOutlineQrCode className="w-14 h-14 text-neutral-500 mx-auto" />
@@ -67,7 +76,7 @@ export default async function JoinLeaguePage({
           <p className="text-sm text-neutral-400 mt-6">
             League code: <span className="font-mono text-neutral-600">{code}</span>
           </p>
-        </div>
+        </motion.div>
       </main>
     );
   }

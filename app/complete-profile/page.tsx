@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createUserQueries } from "@/lib/supabase/queries";
 import { LuUser } from "react-icons/lu";
 import CompleteProfileForm from "./CompleteProfileForm";
+import * as motion from "motion/react-client";
 
 export default async function CompleteProfilePage() {
   const { user } = await withAuth();
@@ -41,7 +42,15 @@ export default async function CompleteProfilePage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center p-8">
-      <div className="max-w-md w-full">
+      <motion.div
+        className="max-w-md w-full"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.6,
+          ease: [0.25, 0.46, 0.45, 0.94]
+        }}
+      >
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <LuUser className="h-12 w-12 text-[#C0A891]" />
@@ -71,7 +80,7 @@ export default async function CompleteProfilePage() {
             Sign Out
           </button>
         </form>
-      </div>
+      </motion.div>
     </main>
   );
 }
