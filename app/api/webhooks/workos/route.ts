@@ -15,12 +15,12 @@ export async function POST(request: Request) {
   }
 
   const event = JSON.parse(body);
-  const supabase = createClient();
+  const supabase = await createClient();
 
   switch (event.event) {
     case "user.created":
-    case "user.updated":
-      await (await supabase).from("users").upsert({
+      // For new users, create with WorkOS data
+      await supabase.from("users").upsert({
         workos_user_id: event.data.id,
         email: event.data.email,
         first_name: event.data.first_name,
@@ -30,8 +30,40 @@ export async function POST(request: Request) {
       });
       break;
 
+    case "user.updated": {
+      // For existing users, only update email (preserve local profile data)
+      // Check if user exists and has completed profile
+      const { data: existingUser } = await supabase
+        .from("users")
+        .select("profile_completed")
+        .eq("workos_user_id", event.data.id)
+        .single();
+
+      if (existingUser?.profile_completed) {
+        // Only update email for users with completed profiles
+        await supabase
+          .from("users")
+          .update({
+            email: event.data.email,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("workos_user_id", event.data.id);
+      } else {
+        // For users without completed profiles, update all fields
+        await supabase.from("users").upsert({
+          workos_user_id: event.data.id,
+          email: event.data.email,
+          first_name: event.data.first_name,
+          last_name: event.data.last_name,
+          profile_picture_url: event.data.profilePictureUrl,
+          updated_at: new Date().toISOString(),
+        });
+      }
+      break;
+    }
+
     case "user.deleted":
-      await (await supabase)
+      await supabase
         .from("users")
         .delete()
         .eq("workos_user_id", event.data.id);
