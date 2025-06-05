@@ -19,7 +19,7 @@ export default async function ProfilePage() {
   }
 
   return (
-    <main className="min-h-screen p-6">
+    <main className="min-h-svh p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-semibold text-foreground mb-10">Profile</h1>
         <ProfileForm user={user} dbUser={dbUser} />

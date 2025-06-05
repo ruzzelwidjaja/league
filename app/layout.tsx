@@ -33,7 +33,7 @@ export default function RootLayout({
       >
         <AuthKitProvider>{children}</AuthKitProvider>
         <Analytics />
-        <Toaster position="bottom-right" />
+        <Toaster position="top-center" />
       </body>
     </html>
   );
