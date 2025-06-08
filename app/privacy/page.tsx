@@ -52,7 +52,7 @@ export default function PrivacyPolicyPage() {
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Technical Information</h3>
                 <ul className="list-disc list-inside text-gray-700 space-y-1">
-                  <li>Authentication data (managed by WorkOS)</li>
+                  <li>Authentication data (managed by Better Auth)</li>
                   <li>Usage patterns and interaction data</li>
                   <li>Device and browser information</li>
                 </ul>
@@ -84,7 +84,7 @@ export default function PrivacyPolicyPage() {
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Third Party Services</h3>
                 <p className="text-gray-700">
-                  We use WorkOS for authentication services and Supabase for data storage. Both services have their own privacy policies and security measures in place.
+                  We use Better Auth for authentication services and Supabase for data storage. Both services have their own privacy policies and security measures in place.
                 </p>
               </div>
               <div>

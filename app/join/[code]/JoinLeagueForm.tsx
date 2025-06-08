@@ -81,7 +81,7 @@ export default function JoinLeagueForm({ league }: { league: League }) {
       });
 
       if (response.ok) {
-        router.push(`/league/${league.join_code}`);
+        router.push(`/league/${league.joinCode}`);
       } else {
         console.error("Failed to join league");
         setIsJoining(false);

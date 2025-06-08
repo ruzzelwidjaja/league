@@ -1,13 +1,8 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  withAuth,
-  getSignInUrl,
-  getSignUpUrl,
-  signOut,
-} from "@workos-inc/authkit-nextjs";
-import { createUserQueries, createLeagueMemberQueries } from "@/lib/supabase/queries";
-import { redirect } from "next/navigation";
+import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { PiPingPongFill } from "react-icons/pi";
@@ -16,42 +11,73 @@ import JoinLeagueInput from "@/components/JoinLeagueInput";
 import { InfoBox } from "@/components/ui/info-box";
 import * as motion from "motion/react-client";
 
-export default async function HomePage() {
-  const { user } = await withAuth();
-  console.log("user in root page-->", user);
-
-  if (user) {
-    // User is logged in, check if they're in a league
-    const userQueries = createUserQueries();
-
-    // Get user from database
-    const dbUser = await userQueries.getUserByWorkosId(user.id);
-
-    if (!dbUser) {
-      console.error("Error fetching dbUser: User not found");
+// Helper function to check if user is in a league
+async function checkUserLeague(userId: string) {
+  try {
+    const response = await fetch(`/api/user/league-status?userId=${userId}`);
+    if (response.ok) {
+      const data = await response.json();
+      return data.leagueCode;
     }
-    console.log("dbUser in root page-->", dbUser);
+  } catch (error) {
+    console.error("Error checking user league:", error);
+  }
+  return null;
+}
 
-    // Check if profile is completed - redirect if not
-    if (dbUser && !dbUser.profile_completed) {
-      redirect("/complete-profile");
-    }
+export default function HomePage() {
+  const { data: session, isPending } = useSession();
+  const [isCheckingLeague, setIsCheckingLeague] = useState(false);
+  const hasChecked = React.useRef(false);
 
-    if (dbUser) {
-      // Check if user is in any league
-      const leagueMemberQueries = createLeagueMemberQueries();
-      const membership = await leagueMemberQueries.getUserFirstLeague(dbUser.id);
-      console.log("in root page, logged in");
-      console.log("dbUser in root page-->", dbUser);
-      console.log("membership in root page-->", membership);
+  // Check if authenticated user is in a league (only once per session)
+  useEffect(() => {
+    if (session?.user && !isCheckingLeague && !hasChecked.current) {
+      hasChecked.current = true;
+      setIsCheckingLeague(true);
 
-      if (membership?.leagues) {
-        // User is in a league, redirect to it
-        redirect(`/league/${membership.leagues.join_code}`);
+      // First check if there's a pending league code from sign-up flow
+      const pendingLeagueCode = localStorage.getItem('pendingLeagueCode');
+      if (pendingLeagueCode) {
+        localStorage.removeItem('pendingLeagueCode');
+        // Use router.replace for faster navigation
+        window.location.replace(`/join/${pendingLeagueCode}`);
+        return;
       }
-    }
 
-    // User is logged in but not in a league
+      // Then check if user is already in a league
+      checkUserLeague(session.user.id)
+        .then((leagueCode) => {
+          if (leagueCode) {
+            // Use router.replace for faster navigation
+            window.location.replace(`/league/${leagueCode}`);
+          } else {
+            setIsCheckingLeague(false);
+          }
+        })
+        .catch(() => setIsCheckingLeague(false));
+    }
+  }, [session?.user]);
+
+  // Show blank page while checking league
+  if (isCheckingLeague) {
+    return (
+      <div className="min-h-svh flex items-center justify-center bg-background">
+      </div>
+    );
+  }
+
+  // Loading state - show for any loading condition
+  if (isPending || isCheckingLeague || (session?.user && !hasChecked.current)) {
+    return (
+      <div className="min-h-svh flex items-center justify-center">
+        {/* <div className="h-20 w-20 border-8 border-border-200 text-secondary inline-block animate-spin rounded-full border-solid border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status"></div> */}
+      </div>
+    );
+  }
+
+  // User is authenticated but not in a league
+  if (session?.user) {
     return (
       <main className="min-h-svh flex items-center justify-center p-8">
         <motion.div
@@ -85,29 +111,20 @@ export default async function HomePage() {
             Visit the front desk at WeWork or scan the QR code posted in the building&apos;s ping pong area to get your league access code.
           </InfoBox>
 
-          <form
-            action={async () => {
-              "use server";
-              await signOut();
-            }}
-            className="mt-6 text-center"
-          >
-            <button
-              type="submit"
+          <div className="mt-6 text-center">
+            <Link
+              href="/auth/signin"
               className="text-gray-500 hover:text-gray-700 text-sm"
             >
               Sign Out
-            </button>
-          </form>
+            </Link>
+          </div>
         </motion.div>
       </main>
     );
   }
 
-  // User is not logged in - show landing page with animations
-  const signInUrl = await getSignInUrl();
-  const signUpUrl = await getSignUpUrl();
-
+  // User is not authenticated - show landing page
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -130,7 +147,7 @@ export default async function HomePage() {
       scale: 1,
       transition: {
         duration: 0.5,
-        ease: [0.25, 0.46, 0.45, 0.94] // Custom cubic-bezier for smooth easing
+        ease: [0.25, 0.46, 0.45, 0.94]
       }
     }
   };
@@ -194,7 +211,7 @@ export default async function HomePage() {
               size="lg"
               className="group px-8 py-4 text-base font-medium transition-all duration-300 w-full sm:w-auto"
             >
-              <Link href={signUpUrl}>
+              <Link href="/auth/signup">
                 Join the League
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
@@ -208,7 +225,7 @@ export default async function HomePage() {
               size="lg"
               className="px-8 py-4 text-base font-medium border border-neutral-300 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 transition-all duration-300 w-full sm:w-auto"
             >
-              <Link href={signInUrl}>
+              <Link href="/auth/signin">
                 Already a Player?
               </Link>
             </Button>
@@ -216,7 +233,7 @@ export default async function HomePage() {
         </motion.div>
       </div>
 
-      {/* Subtle background decoration with delayed fade-in */}
+      {/* Subtle background decoration */}
       <motion.div
         className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-gradient-to-br from-neutral-100/40 to-stone-100/40 blur-3xl"
         initial={{ opacity: 0, scale: 0.8 }}

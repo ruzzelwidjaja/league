@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { withAuth } from "@workos-inc/authkit-nextjs";
-import { createUserQueries } from "@/lib/supabase/queries";
+import { auth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
 // Validate Irish mobile number
@@ -15,8 +14,34 @@ function isValidIrishMobile(number: string): boolean {
   );
 }
 
+// Delete old profile picture from storage
+async function deleteOldProfilePicture(oldUrl: string): Promise<void> {
+  try {
+    if (!oldUrl) return;
+
+    const supabase = await createClient();
+    // Extract file path from URL
+    const urlParts = oldUrl.split('/');
+    const fileName = urlParts[urlParts.length - 1];
+
+    if (fileName && fileName !== 'undefined') {
+      const { error } = await supabase.storage
+        .from('profile-pictures')
+        .remove([fileName]);
+
+      if (error) {
+        console.error('Error deleting old profile picture:', error);
+      } else {
+        console.log('Old profile picture deleted:', fileName);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to delete old profile picture:', error);
+  }
+}
+
 // Upload file to Supabase Storage
-async function uploadProfilePicture(file: File, userId: string): Promise<string | null> {
+async function uploadProfilePicture(file: File, userId: string, oldProfileUrl?: string): Promise<string | null> {
   try {
     const supabase = await createClient();
     const fileExt = file.name.split('.').pop();
@@ -45,6 +70,11 @@ async function uploadProfilePicture(file: File, userId: string): Promise<string 
       .from('profile-pictures')
       .getPublicUrl(data.path);
 
+    // Delete old profile picture after successful upload
+    if (oldProfileUrl) {
+      await deleteOldProfilePicture(oldProfileUrl);
+    }
+
     return publicUrl;
   } catch (error) {
     console.error('File upload failed:', error);
@@ -54,17 +84,12 @@ async function uploadProfilePicture(file: File, userId: string): Promise<string 
 
 export async function POST(request: NextRequest) {
   try {
-    const { user } = await withAuth({ ensureSignedIn: true });
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
 
-    if (!user) {
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userQueries = createUserQueries();
-    const dbUser = await userQueries.getUserByWorkosId(user.id);
-
-    if (!dbUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Parse form data
@@ -93,10 +118,30 @@ export async function POST(request: NextRequest) {
 
     let profilePictureUrl: string | null = null;
 
+    // Get current profile picture URL for deletion
+    let oldProfilePictureUrl: string | undefined = undefined;
+    const { Pool: PostgresPool } = await import("pg");
+    const profilePool = new PostgresPool({
+      connectionString: process.env.DATABASE_URL,
+    });
+
+    try {
+      const currentUserResult = await profilePool.query(`
+        SELECT "profilePictureUrl" FROM "user" WHERE id = $1
+      `, [session.user.id]);
+
+      if (currentUserResult.rows.length > 0) {
+        oldProfilePictureUrl = currentUserResult.rows[0].profilePictureUrl || undefined;
+      }
+    } catch (error) {
+      console.error('Error getting current profile picture:', error);
+    }
+
     // Handle profile picture upload
     if (profilePicture && profilePicture.size > 0) {
       // Validate file size (5MB limit)
       if (profilePicture.size > 5 * 1024 * 1024) {
+        await profilePool.end();
         return NextResponse.json(
           { error: "File size must be less than 5MB" },
           { status: 400 }
@@ -105,15 +150,17 @@ export async function POST(request: NextRequest) {
 
       // Validate file type
       if (!profilePicture.type.startsWith('image/')) {
+        await profilePool.end();
         return NextResponse.json(
           { error: "Please select an image file" },
           { status: 400 }
         );
       }
 
-      profilePictureUrl = await uploadProfilePicture(profilePicture, user.id);
+      profilePictureUrl = await uploadProfilePicture(profilePicture, session.user.id, oldProfilePictureUrl);
 
       if (!profilePictureUrl) {
+        await profilePool.end();
         return NextResponse.json(
           { error: "Failed to upload profile picture" },
           { status: 500 }
@@ -121,31 +168,40 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update user in database
-    const updateData: Record<string, string | null> = {
-      first_name: firstName.trim(),
-      last_name: lastName.trim(),
-      organization_name: organizationName?.trim() || null,
-      phone_number: phoneNumber || null,
-    };
+    await profilePool.end();
+
+    // Update user in Better Auth database using direct query
+    const { Pool } = await import("pg");
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+
+    const updateFields = [
+      '"firstName" = $1',
+      '"lastName" = $2',
+      '"organizationName" = $3',
+      '"phoneNumber" = $4',
+      '"updatedAt" = NOW()'
+    ];
+    const updateValues = [
+      firstName.trim(),
+      lastName.trim(),
+      organizationName?.trim() || null,
+      phoneNumber || null
+    ];
 
     if (profilePictureUrl) {
-      updateData.profile_picture_url = profilePictureUrl;
+      updateFields.push('"profilePictureUrl" = $5');
+      updateValues.push(profilePictureUrl);
     }
 
-    const supabase = await createClient();
-    const { error } = await supabase
-      .from('users')
-      .update(updateData)
-      .eq('id', dbUser.id);
+    await pool.query(`
+      UPDATE "user" 
+      SET ${updateFields.join(', ')}
+      WHERE id = $${updateValues.length + 1}
+    `, [...updateValues, session.user.id]);
 
-    if (error) {
-      console.error('Database update error:', error);
-      return NextResponse.json(
-        { error: "Failed to update profile" },
-        { status: 500 }
-      );
-    }
+    await pool.end();
 
     return NextResponse.json({
       success: true,

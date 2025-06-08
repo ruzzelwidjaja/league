@@ -1,28 +1,23 @@
 import React from "react";
-import { withAuth } from "@workos-inc/authkit-nextjs";
+import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { createUserQueries } from "@/lib/supabase/queries";
 import ProfileForm from "./ProfileForm";
+import { headers } from "next/headers";
 
 export default async function ProfilePage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (!user) {
-    redirect("/");
-  }
-
-  const userQueries = createUserQueries();
-  const dbUser = await userQueries.getUserByWorkosId(user.id);
-
-  if (!dbUser) {
-    redirect("/");
+  if (!session?.user) {
+    redirect("/auth/signin");
   }
 
   return (
     <main className="min-h-svh p-6">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-semibold text-foreground mb-10">Profile</h1>
-        <ProfileForm user={user} dbUser={dbUser} />
+        <ProfileForm user={session.user} />
       </div>
     </main>
   );

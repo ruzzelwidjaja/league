@@ -9,22 +9,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { handleSignOut } from "./actions";
+import { authClient } from "@/lib/auth-client";
 
 interface UserDropdownProps {
   user: {
-    firstName: string | null;
-    lastName: string | null;
+    id: string;
+    name: string;
+    email: string;
+    firstName?: string | null;
+    lastName?: string | null;
     profilePictureUrl?: string | null;
-  };
-  dbUser: {
-    first_name: string | null;
-    last_name: string | null;
-    profile_picture_url: string | null;
+    image?: string | null;
   };
 }
 
-export default function UserDropdown({ user, dbUser }: UserDropdownProps) {
+export default function UserDropdown({ user }: UserDropdownProps) {
   const getInitials = (firstName?: string | null, lastName?: string | null) => {
     if (firstName && lastName) {
       return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -35,10 +34,10 @@ export default function UserDropdown({ user, dbUser }: UserDropdownProps) {
     return "U";
   };
 
-  // Use database user data if available, fallback to WorkOS user data
-  const displayFirstName = dbUser.first_name || user.firstName;
-  const displayLastName = dbUser.last_name || user.lastName;
-  const displayProfilePicture = dbUser.profile_picture_url || user.profilePictureUrl;
+  const handleSignOut = async () => {
+    await authClient.signOut();
+    window.location.href = "/";
+  };
 
   return (
     <DropdownMenu>
@@ -46,11 +45,11 @@ export default function UserDropdown({ user, dbUser }: UserDropdownProps) {
         <button className="flex items-center">
           <Avatar className="size-8">
             <AvatarImage
-              src={displayProfilePicture || undefined}
-              alt={`${displayFirstName} ${displayLastName}`}
+              src={user.profilePictureUrl || user.image || undefined}
+              alt={`${user.firstName} ${user.lastName}`}
             />
             <AvatarFallback className="text-xs font-medium bg-primary text-primary-foreground">
-              {getInitials(displayFirstName, displayLastName)}
+              {getInitials(user.firstName, user.lastName)}
             </AvatarFallback>
           </Avatar>
         </button>
@@ -62,11 +61,9 @@ export default function UserDropdown({ user, dbUser }: UserDropdownProps) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <form action={handleSignOut} className="w-full">
-            <button type="submit" className="flex items-center w-full">
-              Sign Out
-            </button>
-          </form>
+          <button onClick={handleSignOut} className="flex items-center w-full">
+            Sign Out
+          </button>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,14 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createLeagueQueries } from "@/lib/supabase/queries";
 
 export async function GET(
   _request: NextRequest,
   context: { params: Promise<{ code: string }> },
 ) {
-  const { code } = await context.params;
-  const leagueQueries = createLeagueQueries();
+  try {
+    const { code } = await context.params;
 
-  const exists = await leagueQueries.leagueExists(code);
+    const { Pool } = await import("pg");
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
 
-  return NextResponse.json({ exists });
+    const result = await pool.query(`
+      SELECT id FROM leagues WHERE "joinCode" = $1
+    `, [code]);
+
+    await pool.end();
+
+    return NextResponse.json({ exists: result.rows.length > 0 });
+
+  } catch (error) {
+    console.error("Error checking league:", error);
+    return NextResponse.json({ exists: false });
+  }
 }
