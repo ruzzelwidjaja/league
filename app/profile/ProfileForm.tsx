@@ -70,31 +70,25 @@ interface ProfileFormProps {
   user: {
     id: string;
     email: string;
-    firstName: string | null;
-    lastName: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    phoneNumber?: string | null;
     profilePictureUrl?: string | null;
-  };
-  dbUser: {
-    id: string;
-    first_name: string | null;
-    last_name: string | null;
-    phone_number: string | null;
-    profile_picture_url: string | null;
-    organization_name: string | null;
-    email: string;
+    organizationName?: string | null;
+    image?: string | null;
   };
 }
 
-export default function ProfileForm({ user, dbUser }: ProfileFormProps) {
-  const [firstName, setFirstName] = useState(dbUser.first_name || user.firstName || "");
-  const [lastName, setLastName] = useState(dbUser.last_name || user.lastName || "");
-  const [organizationName, setOrganizationName] = useState(dbUser.organization_name || "");
+export default function ProfileForm({ user }: ProfileFormProps) {
+  const [firstName, setFirstName] = useState(user.firstName || "");
+  const [lastName, setLastName] = useState(user.lastName || "");
+  const [organizationName, setOrganizationName] = useState(user.organizationName || "");
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>(
-    dbUser.phone_number || undefined
+    user.phoneNumber || undefined
   );
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
-    dbUser.profile_picture_url || user.profilePictureUrl || null
+    user.profilePictureUrl || user.image || null
   );
   const [phoneError, setPhoneError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -180,6 +174,22 @@ export default function ProfileForm({ user, dbUser }: ProfileFormProps) {
 
       if (response.ok) {
         toast.success("Profile updated successfully!");
+
+        // Check if user is in a league and redirect back to it
+        try {
+          const leagueResponse = await fetch(`/api/user/league-status?userId=${user.id}`);
+          if (leagueResponse.ok) {
+            const leagueData = await leagueResponse.json();
+            if (leagueData.inLeague && leagueData.leagueCode) {
+              router.push(`/league/${leagueData.leagueCode}`);
+              return;
+            }
+          }
+        } catch (error) {
+          console.error("Error checking league status:", error);
+        }
+
+        // Fallback to refresh if no league found
         router.refresh();
       } else {
         const data = await response.json();
