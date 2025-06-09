@@ -1,27 +1,9 @@
 import { betterAuth } from "better-auth";
 import { Pool } from "pg";
 import { Resend } from "resend";
+import { createVerificationEmailHtml } from "./email/templates/verification-email";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-console.log('=== DEBUG INFO ===');
-console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
-console.log('DATABASE_URL preview:', process.env.DATABASE_URL?.substring(0, 30) + '...');
-console.log('All env vars containing DATABASE:', Object.keys(process.env).filter(key => key.includes('DATABASE')));
-console.log('================');
-
-console.log('database url', process.env.DATABASE_URL)
-
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-console.log('Pool config:', {
-  host: pool.options?.host,
-  database: pool.options?.database,
-  connectionString: process.env.DATABASE_URL?.substring(0, 50) + '...'
-});
 
 export const auth = betterAuth({
   database: new Pool({
@@ -35,13 +17,20 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({ user, url }) => {
       try {
         console.log('Attempting to send verification email to:', user.email);
+
+        // Create professional email template
+        const firstName = user.name?.split(' ')[0] || 'there';
+        const emailHtml = createVerificationEmailHtml({
+          userEmail: user.email,
+          verificationUrl: url,
+          userName: firstName,
+        });
+
         const result = await resend.emails.send({
           from: 'ping_pong_league@ruzzel.me',
           to: user.email,
-          subject: 'Verify your email',
-          html: `
-            <p>Welcome to the Ping Pong League!</p>
-            <p>Click <a href="${url}">here</a> to verify your email.</p>`,
+          subject: 'Verify your email - Ping Pong League',
+          html: emailHtml,
         });
         console.log('Email sent successfully:', result);
       } catch (error) {
