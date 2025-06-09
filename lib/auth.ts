@@ -4,7 +4,24 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+console.log('=== DEBUG INFO ===');
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+console.log('DATABASE_URL preview:', process.env.DATABASE_URL?.substring(0, 30) + '...');
+console.log('All env vars containing DATABASE:', Object.keys(process.env).filter(key => key.includes('DATABASE')));
+console.log('================');
+
 console.log('database url', process.env.DATABASE_URL)
+
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+console.log('Pool config:', {
+  host: pool.options?.host,
+  database: pool.options?.database,
+  connectionString: process.env.DATABASE_URL?.substring(0, 50) + '...'
+});
 
 export const auth = betterAuth({
   database: new Pool({
@@ -57,10 +74,7 @@ export const auth = betterAuth({
         type: "string",
         required: false,
       },
-      profileCompleted: {
-        type: "boolean",
-        defaultValue: false,
-      },
+
       organizationName: {
         type: "string",
         required: false,

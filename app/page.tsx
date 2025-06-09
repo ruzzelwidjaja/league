@@ -33,6 +33,12 @@ export default function HomePage() {
   // Check if authenticated user is in a league (only once per session)
   useEffect(() => {
     if (session?.user && !isCheckingLeague && !hasChecked.current) {
+      // Check if email is verified first
+      if (!session.user.emailVerified) {
+        // Redirect to sign-in with message about email verification
+        window.location.replace('/auth/signin?message=Please check your email and verify your account');
+        return;
+      }
       hasChecked.current = true;
       setIsCheckingLeague(true);
 

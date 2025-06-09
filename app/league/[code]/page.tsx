@@ -24,6 +24,11 @@ export default async function LeaguePage({
     redirect("/auth/signin");
   }
 
+  // Check if email is verified
+  if (!session.user.emailVerified) {
+    redirect("/auth/signin?message=Please verify your email first");
+  }
+
   // Get league and check membership using direct database queries
   const { Pool } = await import("pg");
   const pool = new Pool({

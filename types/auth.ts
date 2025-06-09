@@ -13,22 +13,22 @@ export const UserSchema = z.object({
   firstName: z.string().nullable(),
   lastName: z.string().nullable(),
   phoneNumber: z.string().nullable(),
-  profileCompleted: z.boolean().nullable(),
+
   organizationName: z.string().nullable(),
   availability: z.record(z.any()).nullable(), // JSON object
   profilePictureUrl: z.string().url().nullable(),
 });
 
-export const UserInsertSchema = UserSchema.omit({ 
-  id: true, 
-  createdAt: true, 
-  updatedAt: true 
+export const UserInsertSchema = UserSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
 }).extend({
   id: z.string().optional(),
   createdAt: z.string().datetime().optional(),
   updatedAt: z.string().datetime().optional(),
   emailVerified: z.boolean().optional(),
-  profileCompleted: z.boolean().optional(),
+
 });
 
 export const UserUpdateSchema = UserSchema.partial().extend({

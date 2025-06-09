@@ -118,7 +118,7 @@ export default function SignUpForm() {
         lastName: lastName.trim(),
         phoneNumber: phoneNumber,
         organizationName: organizationName.trim() || null,
-        profileCompleted: true, // Mark as completed since we collect everything here
+
       });
 
       if (error) {

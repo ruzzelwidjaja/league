@@ -13,6 +13,11 @@ export default async function ProfilePage() {
     redirect("/auth/signin");
   }
 
+  // Check if email is verified
+  if (!session.user.emailVerified) {
+    redirect("/auth/signin?message=Please verify your email first");
+  }
+
   return (
     <main className="min-h-svh p-6">
       <div className="max-w-2xl mx-auto">

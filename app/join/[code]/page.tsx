@@ -61,6 +61,11 @@ export default function JoinLeaguePage() {
   useEffect(() => {
     const checkMembership = async () => {
       if (session?.user && league && !isCheckingMembership && !hasMembershipChecked.current) {
+        // Check if email is verified first
+        if (!session.user.emailVerified) {
+          router.push('/auth/signin?message=Please verify your email first');
+          return;
+        }
         hasMembershipChecked.current = true;
         setIsCheckingMembership(true);
         try {

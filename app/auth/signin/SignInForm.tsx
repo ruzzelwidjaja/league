@@ -18,6 +18,7 @@ export default function SignInForm() {
   // Get redirect URL and league code from search params
   const redirectTo = searchParams.get("redirect") || "/";
   const leagueCode = searchParams.get("league");
+  const message = searchParams.get("message");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,49 +61,56 @@ export default function SignInForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="email">Email Address</Label>
-        <Input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          placeholder="Enter your email"
-          disabled={isSubmitting}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          placeholder="Enter your password"
-          disabled={isSubmitting}
-        />
-      </div>
-
-      <Button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full"
-        size="lg"
-      >
-        {isSubmitting ? "Signing in..." : "Sign In"}
-      </Button>
-
-      {leagueCode && (
-        <div className="text-center">
-          <p className="text-sm text-neutral-600">
-            You&apos;ll be redirected to join the league after signing in
-          </p>
+    <>
+      {message && (
+        <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+          <p className="text-sm text-amber-800">{message}</p>
         </div>
       )}
-    </form>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email Address</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="Enter your email"
+            disabled={isSubmitting}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="Enter your password"
+            disabled={isSubmitting}
+          />
+        </div>
+
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full"
+          size="lg"
+        >
+          {isSubmitting ? "Signing in..." : "Sign In"}
+        </Button>
+
+        {leagueCode && (
+          <div className="text-center">
+            <p className="text-sm text-neutral-600">
+              You&apos;ll be redirected to join the league after signing in
+            </p>
+          </div>
+        )}
+      </form>
+    </>
   );
 } 

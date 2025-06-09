@@ -12,7 +12,7 @@ export interface User {
   firstName?: string | null;
   lastName?: string | null;
   phoneNumber?: string | null;
-  profileCompleted?: boolean;
+
   organizationName?: string | null;
   availability?: UserAvailability;
   profilePictureUrl?: string | null;

@@ -18,10 +18,7 @@ export const authClient = createAuthClient({
           type: "string",
           required: false,
         },
-        profileCompleted: {
-          type: "boolean",
-          required: false,
-        },
+
         organizationName: {
           type: "string",
           required: false,
