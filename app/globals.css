@@ -46,7 +46,7 @@
 :root {
   --radius: 0.625rem;
   /* --background: oklch(1 0 0); */
-  --background: #FDFDF6;
+  --background: #fdfdf6;
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -58,7 +58,8 @@
   /* --primary: #889388; */
   --primary: #c0a891;
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  /* --secondary: oklch(0.97 0 0); */
+  --secondary: hsl(29, 27%, 80%);
   --secondary-foreground: oklch(0.205 0 0);
   /* --muted: oklch(0.97 0 0); */
   --muted: oklch(0.997 0.0141 106.57);

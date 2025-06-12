@@ -36,8 +36,8 @@ export default function JoinLeagueForm({ league }: { league: League }) {
   const days = ["monday", "tuesday", "wednesday", "thursday", "friday"];
   const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const times = [
-    { id: "lunch", label: "Lunch" },
-    { id: "after_work", label: "After Work" }
+    { id: "lunch", label: "12-1pm" },
+    { id: "after_work", label: "5-7pm" }
   ];
 
   const toggleSlot = (day: string, time: string) => {
@@ -138,7 +138,7 @@ export default function JoinLeagueForm({ league }: { league: League }) {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">When are you available?</h2>
+              <h2 className="text-xl font-semibold text-foreground">When are you usually available?</h2>
             </div>
             <p className="text-muted-foreground text-sm">Select all time slots when you can play (Monday - Friday only)</p>
 

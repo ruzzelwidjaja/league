@@ -27,7 +27,7 @@ export const auth = betterAuth({
         });
 
         const result = await resend.emails.send({
-          from: 'ping_pong_league@ruzzel.me',
+          from: 'league@ruzzel.me',
           to: user.email,
           subject: 'Verify your email - Ping Pong League',
           html: emailHtml,
