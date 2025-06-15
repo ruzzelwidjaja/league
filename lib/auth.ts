@@ -41,7 +41,6 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     expiresIn: 3600,
-    redirectTo: "/", // This is where users go after verification
   },
   session: {
     cookieCache: {

@@ -42,16 +42,7 @@ export default function HomePage() {
       hasChecked.current = true;
       setIsCheckingLeague(true);
 
-      // First check if there's a pending league code from sign-up flow
-      const pendingLeagueCode = localStorage.getItem('pendingLeagueCode');
-      if (pendingLeagueCode) {
-        localStorage.removeItem('pendingLeagueCode');
-        // Use router.replace for faster navigation
-        window.location.replace(`/join/${pendingLeagueCode}`);
-        return;
-      }
-
-      // Then check if user is already in a league
+      // Check if user is already in a league
       checkUserLeague(session.user.id)
         .then((leagueCode) => {
           if (leagueCode) {

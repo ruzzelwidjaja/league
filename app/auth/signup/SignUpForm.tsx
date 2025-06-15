@@ -118,7 +118,7 @@ export default function SignUpForm() {
         lastName: lastName.trim(),
         phoneNumber: phoneNumber,
         organizationName: organizationName.trim() || null,
-
+        callbackURL: "/auth/verify-callback", // This should redirect to our callback page
       });
 
       if (error) {
@@ -127,10 +127,6 @@ export default function SignUpForm() {
       }
 
       if (data?.user) {
-        // Store league code in localStorage if present (for post-verification redirect)
-        if (leagueCode) {
-          localStorage.setItem('pendingLeagueCode', leagueCode);
-        }
         // Show success state instead of immediately redirecting
         setSuccess(true);
       }

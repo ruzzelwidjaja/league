@@ -1,13 +1,13 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
+import React from "react";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { HiOutlineQrCode } from "react-icons/hi2";
 import JoinLeagueForm from "./JoinLeagueForm";
 import * as motion from "motion/react-client";
 import Link from "next/link";
+import { Pool } from "pg";
 
 interface League {
   id: string;
@@ -20,81 +20,48 @@ interface League {
   seasonStart: string;
 }
 
-export default function JoinLeaguePage() {
-  const params = useParams();
-  const router = useRouter();
-  const code = params.code as string;
-  const { data: session, isPending } = useSession();
-  const [league, setLeague] = useState<League | null>(null);
-  const [isLoadingLeague, setIsLoadingLeague] = useState(true);
+export default async function JoinLeaguePage({
+  params,
+}: {
+  params: Promise<{ code: string }>;
+}) {
+  const { code } = await params;
 
-  const [isCheckingMembership, setIsCheckingMembership] = useState(false);
-  const hasMembershipChecked = React.useRef(false);
+  // Get session
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  // Check if league exists
-  useEffect(() => {
-    const checkLeague = async () => {
-      try {
-        const response = await fetch(`/api/leagues/check/${code}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.exists) {
-            // Get league details
-            const leagueResponse = await fetch(`/api/leagues/details/${code}`);
-            if (leagueResponse.ok) {
-              const leagueData = await leagueResponse.json();
-              setLeague(leagueData);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error checking league:", error);
-      } finally {
-        setIsLoadingLeague(false);
-      }
-    };
+  console.log("Session in join page:", {
+    hasSession: !!session,
+    hasUser: !!session?.user,
+    userId: session?.user?.id,
+    isEmailVerified: session?.user?.emailVerified
+  });
 
-    checkLeague();
-  }, [code]);
+  // Check if league exists and get details
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+  });
 
-  // Check if user is already a member when they're authenticated (only once)
-  useEffect(() => {
-    const checkMembership = async () => {
-      if (session?.user && league && !isCheckingMembership && !hasMembershipChecked.current) {
-        // Check if email is verified first
-        if (!session.user.emailVerified) {
-          router.push('/auth/signin?message=Please verify your email first');
-          return;
-        }
-        hasMembershipChecked.current = true;
-        setIsCheckingMembership(true);
-        try {
-          const response = await fetch(`/api/leagues/membership?userId=${session.user.id}&leagueId=${league.id}`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.isMember) {
-              // Redirect to league page
-              router.push(`/league/${code}`);
-            }
-          }
-        } catch (error) {
-          console.error("Error checking membership:", error);
-        } finally {
-          setIsCheckingMembership(false);
-        }
-      }
-    };
+  let league: League | null = null;
 
-    checkMembership();
-  }, [session?.user, league, code, router]);
+  try {
+    const result = await pool.query(`
+      SELECT id, name, description, "joinCode", 
+             "seasonStart", "seasonEnd",
+             "createdBy", "createdAt"
+      FROM leagues 
+      WHERE "joinCode" = $1
+    `, [code]);
 
-  // Loading states
-  if (isPending || isLoadingLeague || isCheckingMembership) {
-    return (
-      <div className="min-h-svh flex items-center justify-center">
-        <div className="h-20 w-20 border-8 border-border-200 text-secondary inline-block animate-spin rounded-full border-solid border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status"></div>
-      </div>
-    );
+    if (result.rows.length > 0) {
+      league = result.rows[0];
+    }
+  } catch (error) {
+    console.error("Error checking league:", error);
+  } finally {
+    await pool.end();
   }
 
   // League not found
@@ -118,73 +85,107 @@ export default function JoinLeaguePage() {
     );
   }
 
-  // User not authenticated - show invitation page
-  if (!session?.user) {
-    return (
-      <main className="min-h-screen flex items-center justify-center p-8">
-        <motion.div
-          className="max-w-md w-full text-center"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.6,
-            ease: [0.25, 0.46, 0.45, 0.94]
-          }}
-        >
-          {/* QR Code Icon */}
-          <div className="mb-8">
-            <HiOutlineQrCode className="w-14 h-14 text-neutral-500 mx-auto" />
-          </div>
+  // Check if user is authenticated and verified
+  if (session && session.user) {
+    if (!session.user.emailVerified) {
+      redirect('/auth/signin?message=Please verify your email first');
+    }
 
-          {/* Heading */}
-          <h1 className="text-3xl font-bold mb-4 text-neutral-800">
-            You&apos;re Invited!
-          </h1>
+    // Check if user is already a member
+    const memberPool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
 
-          {/* Description */}
-          <p className="text-lg text-neutral-600 mb-2">
-            Join <span className="font-semibold">{league.name}</span>
-          </p>
-          <p className="text-neutral-500 mb-8 leading-relaxed">
-            Challenge your colleagues, climb the rankings, and become the office ping pong champion.
-            Create your account to get started.
-          </p>
+    try {
+      const membershipResult = await memberPool.query(`
+        SELECT id 
+        FROM league_members 
+        WHERE "userId" = $1 AND "leagueId" = $2
+      `, [session.user.id, league.id]);
 
-          {/* Action Buttons */}
-          <div className="space-y-4">
-            <Button
-              asChild
-              size="lg"
-              className="w-full"
-              onClick={() => {
-                // Store league code for post-verification redirect
-                localStorage.setItem('pendingLeagueCode', code);
-              }}
-            >
-              <Link href={`/auth/signup?league=${code}`}>
-                Sign Up to Join
-              </Link>
-            </Button>
+      if (membershipResult.rows.length > 0) {
+        redirect(`/league/${code}`);
+      }
+    } catch (error) {
+      console.error("Error checking membership:", error);
+    } finally {
+      await memberPool.end();
+    }
 
-            <Button asChild variant="outline" size="lg" className="w-full">
-              <Link href={`/auth/signin?league=${code}`}>
-                Already have an account? Sign In
-              </Link>
-            </Button>
-          </div>
-
-          {/* League Info */}
-          <p className="text-sm text-neutral-400 mt-6">
-            League code: <span className="font-mono text-neutral-600">{code}</span>
-          </p>
-        </motion.div>
-      </main>
-    );
+    // User is authenticated and not a member - show join form
+    return <JoinLeagueForm league={league} />;
   }
 
-  // Since we now collect all profile info during signup, we don't need profile completion check
-  // Remove the profile completion check entirely
+  // User not authenticated - show invitation page
+  return (
+    <main className="min-h-screen flex items-center justify-center p-8">
+      <motion.div
+        className="max-w-md w-full text-center"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.6,
+          ease: [0.25, 0.46, 0.45, 0.94]
+        }}
+      >
+        {/* QR Code Icon */}
+        <div className="mb-8">
+          <HiOutlineQrCode className="w-14 h-14 text-neutral-500 mx-auto" />
+        </div>
 
-  // User is authenticated and profile is complete - show join form
-  return <JoinLeagueForm league={league} />;
+        {/* Heading */}
+        <h1 className="text-3xl font-bold mb-4 text-neutral-800">
+          You&apos;re Invited!
+        </h1>
+
+        {/* Description */}
+        <p className="text-lg text-neutral-600 mb-2">
+          Join <span className="font-semibold">{league.name}</span>
+        </p>
+        <p className="text-neutral-500 mb-8 leading-relaxed">
+          Challenge your colleagues, climb the rankings, and become the office ping pong champion.
+          Create your account to get started.
+        </p>
+
+        {/* Action Buttons */}
+        <div className="space-y-4">
+          <form action={async () => {
+            "use server";
+            await import("@/lib/actions/auth").then(({ redirectToAuth }) =>
+              redirectToAuth(code, 'signup')
+            );
+          }}>
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full"
+            >
+              Sign Up to Join
+            </Button>
+          </form>
+
+          <form action={async () => {
+            "use server";
+            await import("@/lib/actions/auth").then(({ redirectToAuth }) =>
+              redirectToAuth(code, 'signin')
+            );
+          }}>
+            <Button
+              type="submit"
+              variant="outline"
+              size="lg"
+              className="w-full"
+            >
+              Already have an account? Sign In
+            </Button>
+          </form>
+        </div>
+
+        {/* League Info */}
+        <p className="text-sm text-neutral-400 mt-6">
+          League code: <span className="font-mono text-neutral-600">{code}</span>
+        </p>
+      </motion.div>
+    </main>
+  );
 }
