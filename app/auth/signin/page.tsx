@@ -1,9 +1,10 @@
 import React from "react";
 import { Suspense } from "react";
 import Link from "next/link";
-import { PiPingPongFill } from "react-icons/pi";
 import SignInForm from "./SignInForm";
 import * as motion from "motion/react-client";
+import Image from "next/image";
+import PingPongIcon from "@/public/PingPongIcon.png";
 
 export default function SignInPage() {
   return (
@@ -19,12 +20,18 @@ export default function SignInPage() {
       >
         {/* Logo */}
         <div className="mb-8 text-center">
-          <PiPingPongFill className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
+          <Image
+            src={PingPongIcon}
+            alt="Ping Pong Icon"
+            width={56}
+            height={56}
+            className="mx-auto mb-4"
+          />
           <h1 className="text-3xl font-bold mb-2 text-neutral-800">
             Welcome Back
           </h1>
           <p className="text-neutral-600">
-            Sign in to your ping pong league account
+            Sign in to your account
           </p>
         </div>
 
