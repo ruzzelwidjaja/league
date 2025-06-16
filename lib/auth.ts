@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { Pool } from "pg";
 import { Resend } from "resend";
-import { createVerificationEmailHtml } from "./email/templates/verification-email";
+import { createVerificationEmailHtml } from "../emails/verification-email";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -12,6 +12,8 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    minPasswordLength: 4,
+    maxPasswordLength: 128,
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
@@ -20,7 +22,7 @@ export const auth = betterAuth({
 
         // Create professional email template
         const firstName = user.name?.split(' ')[0] || 'there';
-        const emailHtml = createVerificationEmailHtml({
+        const emailHtml = await createVerificationEmailHtml({
           userEmail: user.email,
           verificationUrl: url,
           userName: firstName,

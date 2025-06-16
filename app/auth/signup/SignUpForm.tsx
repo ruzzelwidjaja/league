@@ -10,7 +10,8 @@ import { toast } from "sonner";
 import PhoneInput from "react-phone-number-input";
 import styled from "styled-components";
 import "react-phone-number-input/style.css";
-import { PiPingPongFill } from "react-icons/pi";
+import Image from "next/image";
+import PingPongIcon from "@/public/PingPongIcon.png";
 
 const StyledPhoneInputWrapper = styled.div<{ $hasError: boolean }>`
   .PhoneInput {
@@ -171,12 +172,18 @@ export default function SignUpForm() {
     <>
       {/* Logo and Header - only show for sign up form */}
       <div className="mb-8 text-center">
-        <PiPingPongFill className="w-12 h-12 text-neutral-600 mx-auto mb-4" />
+        <Image
+          src={PingPongIcon}
+          alt="Ping Pong Icon"
+          width={56}
+          height={56}
+          className="mx-auto mb-4"
+        />
         <h1 className="text-3xl font-bold mb-2 text-neutral-800">
           Join the League
         </h1>
         <p className="text-neutral-600">
-          Create your account to start playing
+          Create your account to join the league
         </p>
       </div>
 
@@ -267,7 +274,7 @@ export default function SignUpForm() {
             required
             placeholder="Create a password"
             disabled={isSubmitting}
-            minLength={8}
+            minLength={4}
           />
         </div>
 

@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { PiPingPongFill } from "react-icons/pi";
 import { HiHashtag } from "react-icons/hi";
 import JoinLeagueInput from "@/components/JoinLeagueInput";
 import { InfoBox } from "@/components/ui/info-box";
 import * as motion from "motion/react-client";
+import Image from "next/image";
 
 // Helper function to check if user is in a league
 async function checkUserLeague(userId: string) {
@@ -175,8 +175,13 @@ export default function HomePage() {
     >
       <div className="mx-auto max-w-4xl w-full">
         {/* Logo */}
-        <motion.div className="mb-8" variants={itemVariants}>
-          <PiPingPongFill className="w-8 h-8 text-neutral-600" />
+        <motion.div className="mb-6" variants={itemVariants}>
+          <Image
+            src="/PingPongIcon.png"
+            alt="Ping Pong Icon"
+            width={56}
+            height={56}
+          />
         </motion.div>
 
         {/* Main heading */}
