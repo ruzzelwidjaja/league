@@ -188,7 +188,7 @@ export default function SignUpForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-rows-2 gap-4">
+        <div className="grid grid-rows-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="firstName">First Name</Label>
             <Input
@@ -299,14 +299,6 @@ export default function SignUpForm() {
         >
           {isSubmitting ? "Creating Account..." : "Create Account"}
         </Button>
-
-        {leagueCode && (
-          <div className="text-center">
-            <p className="text-sm text-neutral-600">
-              You&apos;ll be redirected to join the league after creating your account
-            </p>
-          </div>
-        )}
 
         <div className="text-xs text-muted-foreground text-center">
           By creating an account, you agree to our Privacy Policy. Your information
