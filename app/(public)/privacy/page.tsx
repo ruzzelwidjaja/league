@@ -148,14 +148,8 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">11. Contact Us</h2>
             <p className="text-gray-700 leading-relaxed">
-              If you have any questions about this Privacy Policy or wish to exercise your rights, please contact us at:
+              If you have any questions about this Privacy Policy or wish to exercise your rights, please contact us at: <a href="mailto:ruzzelwidjaja@gmail.com" className="text-gray-500">ruzzelwidjaja@gmail.com</a>
             </p>
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <p className="text-gray-700">
-                <strong>Email:</strong> privacy@yourleague.com<br />
-                <strong>Subject:</strong> Privacy Policy Inquiry
-              </p>
-            </div>
           </section>
         </div>
       </div>

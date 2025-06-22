@@ -12,6 +12,7 @@ import styled from "styled-components";
 import "react-phone-number-input/style.css";
 import Image from "next/image";
 import PingPongIcon from "@/public/PingPongIcon.png";
+import Link from "next/link";
 
 const StyledPhoneInputWrapper = styled.div<{ $hasError: boolean }>`
   .PhoneInput {
@@ -301,7 +302,7 @@ export default function SignUpForm() {
         </Button>
 
         <div className="text-xs text-muted-foreground text-center">
-          By creating an account, you agree to our Privacy Policy. Your information
+          By creating an account, you agree to our <Link href="/privacy" className="text-gray-500 underline">Privacy Policy</Link>. Your information
           will be shared with other league members to facilitate match coordination.
         </div>
       </form>
