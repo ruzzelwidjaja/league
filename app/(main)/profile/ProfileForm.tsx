@@ -206,7 +206,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Profile Picture Section */}
-      <div className="flex items-center gap-6 mb-10">
+      <div className="flex items-center gap-6 mb-10 animate-fade-in-slide-up">
         <Avatar className="size-14">
           <AvatarImage src={previewUrl || undefined} alt="Profile picture" />
           <AvatarFallback className="text-lg font-medium bg-primary text-primary-foreground">
@@ -238,7 +238,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
       </div>
 
       {/* Personal Information */}
-      <div className="space-y-8">
+      <div className="space-y-8 animate-fade-in-slide-up">
         <div className="space-y-2">
           <Label htmlFor="email">Email Address</Label>
           <Input
@@ -312,7 +312,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
       </div>
 
       {/* Submit Button */}
-      <div className="flex justify-end">
+      <div className="flex justify-end animate-fade-in-slide-up">
         <Button
           type="submit"
           disabled={isSubmitting}

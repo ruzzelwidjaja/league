@@ -61,6 +61,11 @@ export default function UserDropdown({ user }: UserDropdownProps) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
+          <Link href="/rules" className="flex items-center">
+            Rules
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <button onClick={handleSignOut} className="flex items-center w-full">
             Sign Out
           </button>
