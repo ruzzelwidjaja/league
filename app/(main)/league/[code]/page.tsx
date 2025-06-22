@@ -64,7 +64,7 @@ export default async function LeaguePage({
       redirect(`/join/${code}`);
     }
 
-    // Get all members with user details
+    // Get all members with user details - sorted by newest players first (most recent join date)
     const membersResult = await pool.query(`
       SELECT 
         lm.id,
@@ -81,7 +81,7 @@ export default async function LeaguePage({
       FROM league_members lm
       JOIN "user" u ON lm."userId" = u.id
       WHERE lm."leagueId" = $1
-      ORDER BY lm.rank
+      ORDER BY lm."joinedAt" DESC, lm.rank ASC
     `, [league.id]);
 
     await pool.end();

@@ -15,6 +15,8 @@ export async function middleware(request: NextRequest) {
     '/auth/signin',
     '/auth/signup',
     '/auth/verify-callback',
+    '/auth/forgot-password',
+    '/auth/reset-password',
   ];
 
   // API routes and static files should pass through

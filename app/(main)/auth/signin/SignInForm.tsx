@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,6 +93,14 @@ export default function SignInForm() {
             placeholder="Enter your password"
             disabled={isSubmitting}
           />
+          <div className="flex justify-end">
+            <Link
+              href="/auth/forgot-password"
+              className="text-sm text-neutral-600 hover:text-neutral-800 underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
         </div>
 
         <Button

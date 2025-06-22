@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { Pool } from "pg";
 import { Resend } from "resend";
 import { createVerificationEmailHtml } from "../emails/verification-email";
+import { createPasswordResetEmailHtml } from "../emails/password-reset-email";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -14,6 +15,31 @@ export const auth = betterAuth({
     requireEmailVerification: true,
     minPasswordLength: 4,
     maxPasswordLength: 128,
+    sendResetPassword: async ({ user, url }) => {
+      try {
+        console.log('Attempting to send password reset email to:', user.email);
+
+        const firstName = user.name?.split(' ')[0] || 'there';
+
+        // Use react-email template
+        const emailHtml = await createPasswordResetEmailHtml({
+          userEmail: user.email,
+          resetUrl: url,
+          userName: firstName,
+        });
+
+        const result = await resend.emails.send({
+          from: 'league@ruzzel.me',
+          to: user.email,
+          subject: 'Reset your password - Ping Pong League',
+          html: emailHtml,
+        });
+        console.log('Password reset email sent successfully:', result);
+      } catch (error) {
+        console.error('Failed to send password reset email:', error);
+        throw error; // Re-throw so Better Auth knows it failed
+      }
+    },
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
