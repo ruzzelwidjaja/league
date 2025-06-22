@@ -1,12 +1,66 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
 
-export async function middleware() {
-  // For Better Auth, we don't need complex middleware
-  // The session management is handled by Better Auth itself
-  // We just need to ensure API routes are accessible
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const sessionCookie = getSessionCookie(request);
+  const isAuthenticated = !!sessionCookie;
 
-  // Allow all requests to pass through - Better Auth handles authentication at the component level
-  // This is much simpler than the WorkOS approach
+  console.log('Middleware:', { pathname, isAuthenticated, sessionCookie: !!sessionCookie });
+
+  // Public routes that don't require authentication
+  const publicRoutes = [
+    '/',
+    '/privacy',
+    '/auth/signin',
+    '/auth/signup',
+    '/auth/verify-callback',
+  ];
+
+  // API routes and static files should pass through
+  if (
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/favicon.ico') ||
+    pathname.startsWith('/public/')
+  ) {
+    return NextResponse.next();
+  }
+
+  // Join routes with league codes can be accessed by anyone (they handle auth internally)
+  if (pathname.startsWith('/join/')) {
+    return NextResponse.next();
+  }
+
+  // Handle authentication redirects
+  if (!isAuthenticated) {
+    // User not authenticated
+    if (publicRoutes.includes(pathname)) {
+      return NextResponse.next();
+    }
+
+    // Redirect unauthenticated users to signin
+    const signinUrl = new URL('/auth/signin', request.url);
+    if (pathname !== '/auth/signin') {
+      signinUrl.searchParams.set('redirect', pathname);
+    }
+    return NextResponse.redirect(signinUrl);
+  }
+
+  // User is authenticated
+  if (isAuthenticated) {
+    // Redirect authenticated users away from auth pages to home
+    if (pathname.startsWith('/auth/signin') || pathname.startsWith('/auth/signup')) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+
+    // For authenticated users visiting home, redirect to join page
+    // (The home page will now only show landing for unauthenticated users)
+    if (pathname === '/') {
+      return NextResponse.redirect(new URL('/join', request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 

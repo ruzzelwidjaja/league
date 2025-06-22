@@ -96,6 +96,7 @@ export default async function JoinLeaguePage({
       connectionString: process.env.DATABASE_URL,
     });
 
+    let isUserMember = false;
     try {
       const membershipResult = await memberPool.query(`
         SELECT id 
@@ -103,13 +104,17 @@ export default async function JoinLeaguePage({
         WHERE "userId" = $1 AND "leagueId" = $2
       `, [session.user.id, league.id]);
 
-      if (membershipResult.rows.length > 0) {
-        redirect(`/league/${code}`);
-      }
+      console.log('membershipResult---', membershipResult)
+      isUserMember = membershipResult.rows.length > 0;
     } catch (error) {
       console.error("Error checking membership:", error);
     } finally {
       await memberPool.end();
+    }
+
+    // Handle redirect outside of try/catch to avoid catching Next.js redirect errors
+    if (isUserMember) {
+      redirect(`/league/${code}`);
     }
 
     // User is authenticated and not a member - show join form

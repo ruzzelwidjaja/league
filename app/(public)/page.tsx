@@ -1,127 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { HiHashtag } from "react-icons/hi";
-import JoinLeagueInput from "@/components/JoinLeagueInput";
-import { InfoBox } from "@/components/ui/info-box";
 import * as motion from "motion/react-client";
 import Image from "next/image";
 
-// Helper function to check if user is in a league
-async function checkUserLeague(userId: string) {
-  try {
-    const response = await fetch(`/api/user/league-status?userId=${userId}`);
-    if (response.ok) {
-      const data = await response.json();
-      return data.leagueCode;
-    }
-  } catch (error) {
-    console.error("Error checking user league:", error);
-  }
-  return null;
-}
-
 export default function HomePage() {
-  const { data: session, isPending } = useSession();
-  const [isCheckingLeague, setIsCheckingLeague] = useState(false);
-  const hasChecked = React.useRef(false);
+  // This page now only shows the landing page for unauthenticated users
+  // Authenticated users are redirected to /join by middleware
 
-  // Check if authenticated user is in a league (only once per session)
-  useEffect(() => {
-    if (session?.user && !isCheckingLeague && !hasChecked.current) {
-      // Check if email is verified first
-      if (!session.user.emailVerified) {
-        // Redirect to sign-in with message about email verification
-        window.location.replace('/auth/signin?message=Please check your email and verify your account');
-        return;
-      }
-      hasChecked.current = true;
-      setIsCheckingLeague(true);
-
-      // Check if user is already in a league
-      checkUserLeague(session.user.id)
-        .then((leagueCode) => {
-          if (leagueCode) {
-            // Use router.replace for faster navigation
-            window.location.replace(`/league/${leagueCode}`);
-          } else {
-            setIsCheckingLeague(false);
-          }
-        })
-        .catch(() => setIsCheckingLeague(false));
-    }
-  }, [session?.user]);
-
-  // Show blank page while checking league
-  if (isCheckingLeague) {
-    return (
-      <div className="min-h-svh flex items-center justify-center bg-background">
-      </div>
-    );
-  }
-
-  // Loading state - show for any loading condition
-  if (isPending || isCheckingLeague || (session?.user && !hasChecked.current)) {
-    return (
-      <div className="min-h-svh flex items-center justify-center">
-        {/* <div className="h-20 w-20 border-8 border-border-200 text-secondary inline-block animate-spin rounded-full border-solid border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status"></div> */}
-      </div>
-    );
-  }
-
-  // User is authenticated but not in a league
-  if (session?.user) {
-    return (
-      <main className="min-h-svh flex items-center justify-center p-8">
-        <motion.div
-          className="max-w-md w-full"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 0.6,
-            ease: [0.25, 0.46, 0.45, 0.94]
-          }}
-        >
-          {/* Hash Icon */}
-          <div className="mb-8 text-center">
-            <HiHashtag className="w-14 h-14 text-neutral-500 mx-auto" />
-          </div>
-
-          {/* Heading */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2 text-neutral-800">
-              Enter League Code
-            </h1>
-            <p className="text-neutral-600">
-              Enter the code provided by your league administrator
-            </p>
-          </div>
-
-          <JoinLeagueInput />
-
-          {/* Info Box */}
-          <InfoBox title="Don't have a code?" className="mt-8">
-            Visit the front desk at WeWork or scan the QR code posted in the building&apos;s ping pong area to get your league access code.
-          </InfoBox>
-
-          <div className="mt-6 text-center">
-            <Link
-              href="/auth/signin"
-              className="text-gray-500 hover:text-gray-700 text-sm"
-            >
-              Sign Out
-            </Link>
-          </div>
-        </motion.div>
-      </main>
-    );
-  }
-
-  // User is not authenticated - show landing page
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
