@@ -106,7 +106,7 @@ export default async function LeaguePage({
     };
 
     return (
-      <main className="min-h-screen p-6">
+      <main className="min-h-svh p-6">
         <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="flex justify-between items-start mb-6 gap-4 animate-fade-in-slide-up">

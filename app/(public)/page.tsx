@@ -64,14 +64,14 @@ export default function HomePage() {
     >
       <div className="mx-auto max-w-4xl w-full">
         {/* Logo */}
-        <motion.div className="mb-6" variants={itemVariants}>
+        <div className="mb-6">
           <Image
             src="/PingPongIcon.png"
             alt="Ping Pong Icon"
             width={56}
             height={56}
           />
-        </motion.div>
+        </div>
 
         {/* Main heading */}
         <motion.h1
