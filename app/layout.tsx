@@ -30,6 +30,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-svh`}
       >
+        <div className="fixed sm:hidden h-6 w-full top-0 left-0 z-30 pointer-events-none bg-gradient-to-b from-background to-transparent"></div>
         {children}
         <Analytics />
         <Toaster position="top-center" />

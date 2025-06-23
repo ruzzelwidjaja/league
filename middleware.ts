@@ -12,6 +12,7 @@ export async function middleware(request: NextRequest) {
   const publicRoutes = [
     '/',
     '/privacy',
+    '/rules',
     '/auth/signin',
     '/auth/signup',
     '/auth/verify-callback',
