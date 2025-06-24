@@ -116,10 +116,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let profilePictureUrl: string | null = null;
+    let imageUrl: string | null = null;
 
     // Get current profile picture URL for deletion
-    let oldProfilePictureUrl: string | undefined = undefined;
+    let oldImageUrl: string | undefined = undefined;
     const { Pool: PostgresPool } = await import("pg");
     const profilePool = new PostgresPool({
       connectionString: process.env.DATABASE_URL,
@@ -127,11 +127,11 @@ export async function POST(request: NextRequest) {
 
     try {
       const currentUserResult = await profilePool.query(`
-        SELECT "profilePictureUrl" FROM "user" WHERE id = $1
+        SELECT "image" FROM "user" WHERE id = $1
       `, [session.user.id]);
 
       if (currentUserResult.rows.length > 0) {
-        oldProfilePictureUrl = currentUserResult.rows[0].profilePictureUrl || undefined;
+        oldImageUrl = currentUserResult.rows[0].image || undefined;
       }
     } catch (error) {
       console.error('Error getting current profile picture:', error);
@@ -157,9 +157,9 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      profilePictureUrl = await uploadProfilePicture(profilePicture, session.user.id, oldProfilePictureUrl);
+      imageUrl = await uploadProfilePicture(profilePicture, session.user.id, oldImageUrl);
 
-      if (!profilePictureUrl) {
+      if (!imageUrl) {
         await profilePool.end();
         return NextResponse.json(
           { error: "Failed to upload profile picture" },
@@ -176,23 +176,27 @@ export async function POST(request: NextRequest) {
       connectionString: process.env.DATABASE_URL,
     });
 
+    const fullName = `${firstName.trim()} ${lastName.trim()}`;
+
     const updateFields = [
       '"firstName" = $1',
       '"lastName" = $2',
-      '"organizationName" = $3',
-      '"phoneNumber" = $4',
+      '"name" = $3',
+      '"organizationName" = $4',
+      '"phoneNumber" = $5',
       '"updatedAt" = NOW()'
     ];
     const updateValues = [
       firstName.trim(),
       lastName.trim(),
+      fullName,
       organizationName?.trim() || null,
       phoneNumber || null
     ];
 
-    if (profilePictureUrl) {
-      updateFields.push('"profilePictureUrl" = $5');
-      updateValues.push(profilePictureUrl);
+    if (imageUrl) {
+      updateFields.push('"image" = $6');
+      updateValues.push(imageUrl);
     }
 
     await pool.query(`

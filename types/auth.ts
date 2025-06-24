@@ -3,12 +3,12 @@ import { z } from "zod";
 // User schema based on Better Auth + additional fields
 export const UserSchema = z.object({
   id: z.string(),
-  name: z.string(),
+  name: z.string().nullable(),
   email: z.string().email(),
   emailVerified: z.boolean(),
-  image: z.string().nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  image: z.string().url().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
   // Additional fields
   firstName: z.string().nullable(),
   lastName: z.string().nullable(),
@@ -16,7 +16,6 @@ export const UserSchema = z.object({
 
   organizationName: z.string().nullable(),
   availability: z.record(z.any()).nullable(), // JSON object
-  profilePictureUrl: z.string().url().nullable(),
 });
 
 export const UserInsertSchema = UserSchema.omit({
@@ -25,8 +24,8 @@ export const UserInsertSchema = UserSchema.omit({
   updatedAt: true
 }).extend({
   id: z.string().optional(),
-  createdAt: z.string().datetime().optional(),
-  updatedAt: z.string().datetime().optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
   emailVerified: z.boolean().optional(),
 
 });
@@ -84,12 +83,10 @@ export const SignInFormSchema = z.object({
 
 // Profile update schema
 export const ProfileUpdateSchema = z.object({
-  firstName: z.string().min(1, "First name is required").optional(),
-  lastName: z.string().min(1, "Last name is required").optional(),
-  phoneNumber: z.string().nullable().optional(),
-  organizationName: z.string().nullable().optional(),
-  availability: z.record(z.any()).nullable().optional(),
-  profilePictureUrl: z.string().url().nullable().optional(),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  organizationName: z.string().optional(),
+  phoneNumber: z.string().optional(),
 });
 
 // Type exports

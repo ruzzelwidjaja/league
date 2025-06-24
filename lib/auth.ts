@@ -92,16 +92,11 @@ export const auth = betterAuth({
         type: "string",
         required: false,
       },
-
       organizationName: {
         type: "string",
         required: false,
       },
       availability: {
-        type: "string",
-        required: false,
-      },
-      profilePictureUrl: {
         type: "string",
         required: false,
       },

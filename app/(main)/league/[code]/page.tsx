@@ -76,7 +76,7 @@ export default async function LeaguePage({
         u."firstName",
         u."lastName",
         u."organizationName",
-        u."profilePictureUrl"
+        u."image"
       FROM league_members lm
       JOIN "user" u ON lm."userId" = u.id
       WHERE lm."leagueId" = $1
@@ -140,7 +140,7 @@ export default async function LeaguePage({
                   <div className="flex items-center gap-3">
                     <Avatar className="size-10">
                       <AvatarImage
-                        src={member.profilePictureUrl}
+                        src={member.image}
                         alt={`${member.firstName} ${member.lastName}`}
                       />
                       <AvatarFallback className="text-xs font-medium bg-primary text-primary-foreground">
@@ -153,7 +153,7 @@ export default async function LeaguePage({
                           {member.firstName} {member.lastName}
                         </p>
                         {member.user_id === session.user.id && (
-                          <div className="bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-medium">
+                          <div className="bg-primary text-primary-foreground px-2 py-0.5 rounded-md text-xs font-medium">
                             You
                           </div>
                         )}

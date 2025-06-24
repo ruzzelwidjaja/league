@@ -12,10 +12,8 @@ export interface User {
   firstName?: string | null;
   lastName?: string | null;
   phoneNumber?: string | null;
-
   organizationName?: string | null;
   availability?: UserAvailability;
-  profilePictureUrl?: string | null;
 }
 
 // League

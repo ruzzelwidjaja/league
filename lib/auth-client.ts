@@ -14,20 +14,15 @@ export const authClient = createAuthClient({
           type: "string",
           required: false,
         },
-        phoneNumber: {
-          type: "string",
-          required: false,
-        },
-
         organizationName: {
           type: "string",
           required: false,
         },
-        availability: {
+        phoneNumber: {
           type: "string",
           required: false,
         },
-        profilePictureUrl: {
+        availability: {
           type: "string",
           required: false,
         },

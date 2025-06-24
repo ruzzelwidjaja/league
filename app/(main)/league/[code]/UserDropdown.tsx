@@ -18,7 +18,6 @@ interface UserDropdownProps {
     email: string;
     firstName?: string | null;
     lastName?: string | null;
-    profilePictureUrl?: string | null;
     image?: string | null;
   };
 }
@@ -45,7 +44,7 @@ export default function UserDropdown({ user }: UserDropdownProps) {
         <button className="flex items-center">
           <Avatar className="size-8">
             <AvatarImage
-              src={user.profilePictureUrl || user.image || undefined}
+              src={user.image || undefined}
               alt={`${user.firstName} ${user.lastName}`}
             />
             <AvatarFallback className="text-xs font-medium bg-primary text-primary-foreground">

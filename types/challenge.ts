@@ -3,7 +3,7 @@ import { z } from "zod";
 // Challenge status enum
 export const ChallengeStatusSchema = z.enum([
   "pending",
-  "accepted", 
+  "accepted",
   "rejected",
   "scheduled",
   "completed",
@@ -48,8 +48,8 @@ export const ChallengeSchema = z.object({
   createdAt: z.string().datetime().nullable(),
 });
 
-export const ChallengeInsertSchema = ChallengeSchema.omit({ 
-  id: true, 
+export const ChallengeInsertSchema = ChallengeSchema.omit({
+  id: true,
   createdAt: true,
   acceptedAt: true,
   respondedAt: true,
@@ -113,17 +113,15 @@ export const SubmitScoreSchema = z.object({
 export const ChallengeWithDetailsSchema = ChallengeSchema.extend({
   challenger: z.object({
     id: z.string(),
-    name: z.string(),
     firstName: z.string().nullable(),
     lastName: z.string().nullable(),
-    profilePictureUrl: z.string().nullable(),
+    image: z.string().nullable(),
   }).nullable(),
   challenged: z.object({
     id: z.string(),
-    name: z.string(),
     firstName: z.string().nullable(),
     lastName: z.string().nullable(),
-    profilePictureUrl: z.string().nullable(),
+    image: z.string().nullable(),
   }).nullable(),
   league: z.object({
     id: z.string(),

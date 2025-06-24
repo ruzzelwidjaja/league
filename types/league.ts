@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+// League member role schema (?)
+export const LeagueMemberRoleSchema = z.enum(["member", "admin", "owner"]);
+
 // League schema
 export const LeagueSchema = z.object({
   id: z.string(),
@@ -12,9 +15,9 @@ export const LeagueSchema = z.object({
   createdAt: z.string().datetime().nullable(),
 });
 
-export const LeagueInsertSchema = LeagueSchema.omit({ 
-  id: true, 
-  createdAt: true 
+export const LeagueInsertSchema = LeagueSchema.omit({
+  id: true,
+  createdAt: true
 }).extend({
   id: z.string().optional(),
   createdAt: z.string().datetime().nullable().optional(),
@@ -39,7 +42,7 @@ export const LeagueMemberSchema = z.object({
   activityWindowStart: z.string().datetime().nullable(),
 });
 
-export const LeagueMemberInsertSchema = LeagueMemberSchema.omit({ 
+export const LeagueMemberInsertSchema = LeagueMemberSchema.omit({
   id: true,
   joinedAt: true,
   previous_rank: true,
@@ -94,7 +97,7 @@ export const LeagueStandingsSchema = z.object({
     name: z.string(),
     firstName: z.string().nullable(),
     lastName: z.string().nullable(),
-    profilePictureUrl: z.string().nullable(),
+    image: z.string().nullable(),
   }),
   skillTier: z.string(),
   wins: z.number(),

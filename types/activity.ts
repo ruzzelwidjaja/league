@@ -3,7 +3,7 @@ import { z } from "zod";
 // Activity log action enum
 export const ActivityActionSchema = z.enum([
   "user_joined_league",
-  "user_left_league", 
+  "user_left_league",
   "challenge_created",
   "challenge_accepted",
   "challenge_rejected",
@@ -28,9 +28,9 @@ export const ActivityLogSchema = z.object({
   createdAt: z.string().datetime().nullable(),
 });
 
-export const ActivityLogInsertSchema = ActivityLogSchema.omit({ 
-  id: true, 
-  createdAt: true 
+export const ActivityLogInsertSchema = ActivityLogSchema.omit({
+  id: true,
+  createdAt: true
 }).extend({
   id: z.string().optional(),
   createdAt: z.string().datetime().nullable().optional(),
@@ -42,19 +42,17 @@ export const ActivityLogUpdateSchema = ActivityLogSchema.partial().extend({
 
 // Activity log with details schema (for display)
 export const ActivityLogWithDetailsSchema = ActivityLogSchema.extend({
-  user: z.object({
+  actorUser: z.object({
     id: z.string(),
-    name: z.string(),
     firstName: z.string().nullable(),
     lastName: z.string().nullable(),
-    profilePictureUrl: z.string().nullable(),
-  }).nullable(),
-  relatedUser: z.object({
+    image: z.string().nullable(),
+  }),
+  targetUser: z.object({
     id: z.string(),
-    name: z.string(),
     firstName: z.string().nullable(),
     lastName: z.string().nullable(),
-    profilePictureUrl: z.string().nullable(),
+    image: z.string().nullable(),
   }).nullable(),
   league: z.object({
     id: z.string(),
@@ -72,9 +70,9 @@ export const OutOfTownPeriodSchema = z.object({
   createdAt: z.string().datetime().nullable(),
 });
 
-export const OutOfTownPeriodInsertSchema = OutOfTownPeriodSchema.omit({ 
-  id: true, 
-  createdAt: true 
+export const OutOfTownPeriodInsertSchema = OutOfTownPeriodSchema.omit({
+  id: true,
+  createdAt: true
 }).extend({
   id: z.string().optional(),
   createdAt: z.string().datetime().nullable().optional(),
