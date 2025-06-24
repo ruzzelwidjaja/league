@@ -16,7 +16,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Camera, RotateCw, ZoomIn, ZoomOut, Check } from "lucide-react";
+import { Camera, RotateCw, ZoomIn, ZoomOut } from "lucide-react";
 import { toast } from "sonner";
 import AvatarEditor from "react-avatar-editor";
 
@@ -202,21 +202,20 @@ export default function ProfilePictureUpload({
         </div>
       </div>
 
-      <div className={`flex gap-2 pt-4 ${isMobile ? 'flex-col' : ''}`}>
+      <div className={`flex gap-2 pt-4 ${isMobile ? 'flex-col' : 'justify-end'}`}>
         <Button
           type="button"
           variant="outline"
           onClick={handleCancelEdit}
-          className={isMobile ? 'w-full' : 'flex-1'}
+          className={isMobile ? 'w-full' : ''}
         >
           Cancel
         </Button>
         <Button
           type="button"
           onClick={handleSaveEditedImage}
-          className={`gap-2 ${isMobile ? 'w-full' : 'flex-1'}`}
+          className={`gap-2 ${isMobile ? 'w-full order-first' : ''}`}
         >
-          <Check className="w-4 h-4" />
           Save
         </Button>
       </div>
@@ -270,7 +269,7 @@ export default function ProfilePictureUpload({
 
       {/* Avatar Editor Modal - Mobile */}
       {isMobile && (
-        <Drawer open={showEditor && selectedImage !== null} onOpenChange={setShowEditor}>
+        <Drawer open={showEditor && selectedImage !== null} onOpenChange={setShowEditor} dismissible={false} shouldScaleBackground={true}>
           <DrawerContent>
             <DrawerHeader className="text-left">
               <DrawerTitle>Edit Profile Picture</DrawerTitle>
