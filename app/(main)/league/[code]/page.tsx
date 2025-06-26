@@ -110,10 +110,7 @@ export default async function LeaguePage({
         <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="flex justify-between items-start mb-6 gap-4 animate-fade-in-slide-up">
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900">{league.name}</h1>
-              <p className="text-sm text-gray-500 mt-1">Code: {league.joinCode} • {members?.length || 0} players</p>
-            </div>
+            <h1 className="text-2xl font-semibold text-gray-900">{league.name}</h1>
             <div className="mt-2">
               <UserDropdown user={session.user} />
             </div>
@@ -122,14 +119,14 @@ export default async function LeaguePage({
           {/* Info Box */}
           <div className="animate-fade-in-slide-up">
             <InfoBox className="mb-8 text-sm text-muted-foreground p-4">
-              We are currently registering players. You will receive an email once the league is ready to start.
+              We're currently registering players. You'll get an email once the league is ready to start.
             </InfoBox>
           </div>
 
           {/* Players List */}
           <div className="animate-fade-in-slide-up">
             <div className="mb-3">
-              <h2 className="font-medium text-gray-900">Players</h2>
+              <h2 className="font-medium text-gray-900">Players ({members?.length || 0})</h2>
             </div>
             <div className="divide-y divide-gray-100">
               {members?.map((member: any) => (
