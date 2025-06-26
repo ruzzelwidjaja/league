@@ -119,7 +119,7 @@ export default async function LeaguePage({
           {/* Info Box */}
           <div className="animate-fade-in-slide-up">
             <InfoBox className="mb-8 text-sm text-muted-foreground p-4">
-              We're currently registering players. You'll get an email once the league is ready to start.
+              We&apos;re currently registering players. You&apos;ll get an email once the league is ready to start.
             </InfoBox>
           </div>
 
