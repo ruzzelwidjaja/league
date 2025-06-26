@@ -111,9 +111,7 @@ export default async function LeaguePage({
           {/* Header */}
           <div className="flex justify-between items-start mb-6 gap-4 animate-fade-in-slide-up">
             <h1 className="text-2xl font-semibold text-gray-900">{league.name}</h1>
-            <div className="mt-2">
-              <UserDropdown user={session.user} />
-            </div>
+            <UserDropdown user={session.user} />
           </div>
 
           {/* Info Box */}
