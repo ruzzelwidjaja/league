@@ -29,7 +29,7 @@ export const auth = betterAuth({
         });
 
         const result = await resend.emails.send({
-          from: 'league@ruzzel.me',
+          from: 'league@mocha.gg',
           to: user.email,
           subject: 'Reset your password - Ping Pong League',
           html: emailHtml,
@@ -55,7 +55,7 @@ export const auth = betterAuth({
         });
 
         const result = await resend.emails.send({
-          from: 'league@ruzzel.me',
+          from: 'league@mocha.gg',
           to: user.email,
           subject: 'Verify your email - Ping Pong League',
           html: emailHtml,

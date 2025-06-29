@@ -11,6 +11,7 @@ import PhoneInput from "react-phone-number-input";
 import styled from "styled-components";
 import ProfilePictureUpload from "@/components/ProfilePictureUpload";
 import "react-phone-number-input/style.css";
+import { getUserLeagueStatus } from "@/lib/actions/leagues";
 
 const StyledPhoneInputWrapper = styled.div<{ $hasError: boolean }>`
   .PhoneInput {
@@ -148,13 +149,10 @@ export default function ProfileForm({ user }: ProfileFormProps) {
 
         // Check if user is in a league and redirect back to it
         try {
-          const leagueResponse = await fetch(`/api/user/league-status?userId=${user.id}`);
-          if (leagueResponse.ok) {
-            const leagueData = await leagueResponse.json();
-            if (leagueData.inLeague && leagueData.leagueCode) {
-              router.push(`/league/${leagueData.leagueCode}`);
-              return;
-            }
+          const leagueStatus = await getUserLeagueStatus();
+          if (leagueStatus.inLeague && leagueStatus.leagueCode) {
+            router.push(`/league/${leagueStatus.leagueCode}`);
+            return;
           }
         } catch (error) {
           console.error("Error checking league status:", error);

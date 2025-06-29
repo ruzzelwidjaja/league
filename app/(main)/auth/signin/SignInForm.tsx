@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signIn } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { getUserLeagueStatus } from "@/lib/actions/leagues";
 
 export default function SignInForm() {
   const [email, setEmail] = useState("");
@@ -41,15 +42,14 @@ export default function SignInForm() {
         if (leagueCode) {
           router.push(`/join/${leagueCode}`);
         } else {
-          // Check if user is already in a league to avoid the "glimpse" effect
-          const response = await fetch(`/api/user/league-status?userId=${data.user.id}`);
-          if (response.ok) {
-            const leagueData = await response.json();
-            if (leagueData.inLeague && leagueData.leagueCode) {
-              router.push(`/league/${leagueData.leagueCode}`);
-              return;
-            }
+          // Check if user is already in a league
+          const leagueStatus = await getUserLeagueStatus();
+
+          if (leagueStatus.inLeague && leagueStatus.leagueCode) {
+            router.push(`/league/${leagueStatus.leagueCode}`);
+            return;
           }
+
           router.push(redirectTo);
         }
       }
@@ -122,4 +122,4 @@ export default function SignInForm() {
       </form>
     </>
   );
-} 
+}

@@ -28,6 +28,63 @@ export async function checkLeagueExists(code: string): Promise<boolean> {
   }
 }
 
+export async function getUserLeagueStatus(): Promise<{
+  inLeague: boolean
+  leagueCode: string | null
+  error?: string
+}> {
+  try {
+    // 1. Check authentication
+    const session = await auth.api.getSession({
+      headers: await headers()
+    })
+
+    if (!session?.user) {
+      return { inLeague: false, leagueCode: null, error: 'Unauthorized' }
+    }
+
+    const supabase = await createClient()
+
+    // 2. Get user's league status - simpler query without TypeScript issues
+    const { data, error } = await supabase
+      .from('league_members')
+      .select('leagueId')
+      .eq('userId', session.user.id)
+      .limit(1)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Database error:', error)
+      return { inLeague: false, leagueCode: null, error: 'Database error' }
+    }
+
+    if (!data) {
+      return { inLeague: false, leagueCode: null }
+    }
+
+    // 3. Get the league's joinCode in a separate query for clarity
+    const { data: leagueData, error: leagueError } = await supabase
+      .from('leagues')
+      .select('joinCode')
+      .eq('id', data.leagueId)
+      .single()
+
+    if (leagueError) {
+      console.error('League fetch error:', leagueError)
+      return { inLeague: false, leagueCode: null, error: 'League not found' }
+    }
+
+    return {
+      inLeague: true,
+      leagueCode: leagueData.joinCode
+    }
+
+  } catch (error) {
+    console.error('Error checking user league status:', error)
+    return { inLeague: false, leagueCode: null, error: 'Internal server error' }
+  }
+}
+
 export async function joinLeague(
   leagueId: string,
   skillTier: string,
@@ -133,6 +190,7 @@ export async function joinLeague(
 
     // 5. Revalidate relevant pages
     revalidatePath(`/league/${leagueId}`)
+    revalidatePath('/leagues')
 
     return { success: true }
 

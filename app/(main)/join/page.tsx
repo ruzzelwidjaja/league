@@ -1,27 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { useSession } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { HiHashtag } from "react-icons/hi";
 import JoinLeagueInput from "@/components/JoinLeagueInput";
 import { InfoBox } from "@/components/ui/info-box";
 import * as motion from "motion/react-client";
 import { useRouter } from "next/navigation";
-
-// Helper function to check if user is in a league
-async function checkUserLeague(userId: string) {
-  try {
-    const response = await fetch(`/api/user/league-status?userId=${userId}`);
-    if (response.ok) {
-      const data = await response.json();
-      return data.leagueCode;
-    }
-  } catch (error) {
-    console.error("Error checking user league:", error);
-  }
-  return null;
-}
+import { getUserLeagueStatus } from "@/lib/actions/leagues";
+import { Button } from "@/components/ui/button";
 
 export default function JoinPage() {
   const { data: session, isPending } = useSession();
@@ -38,20 +25,24 @@ export default function JoinPage() {
         router.replace('/auth/signin?message=Please check your email and verify your account');
         return;
       }
+
       hasChecked.current = true;
       setIsCheckingLeague(true);
 
-      // Check if user is already in a league
-      checkUserLeague(session.user.id)
-        .then((leagueCode) => {
-          if (leagueCode) {
+      // Check if user is already in a league using Server Action
+      getUserLeagueStatus()
+        .then((leagueStatus) => {
+          if (leagueStatus.inLeague && leagueStatus.leagueCode) {
             // User is already in a league, redirect to their league
-            router.replace(`/league/${leagueCode}`);
+            router.replace(`/league/${leagueStatus.leagueCode}`);
           } else {
             setIsCheckingLeague(false);
           }
         })
-        .catch(() => setIsCheckingLeague(false));
+        .catch((error) => {
+          console.error("Error checking user league:", error);
+          setIsCheckingLeague(false);
+        });
     }
   }, [session?.user, router]);
 
@@ -69,6 +60,11 @@ export default function JoinPage() {
     router.replace('/auth/signin');
     return null;
   }
+
+  const handleSignOut = async () => {
+    await authClient.signOut();
+    window.location.href = "/";
+  };
 
   // User is authenticated, verified, and not in a league - show join form
   return (
@@ -105,14 +101,16 @@ export default function JoinPage() {
         </InfoBox>
 
         <div className="mt-6 text-center">
-          <Link
-            href="/auth/signin"
+          <Button
+            variant="ghost"
+            onClick={handleSignOut}
             className="text-gray-500 hover:text-gray-700 text-sm"
+            size="sm"
           >
             Sign Out
-          </Link>
+          </Button>
         </div>
       </motion.div>
     </main>
   );
-} 
+}
