@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { checkLeagueExists } from "@/lib/actions/leagues";
 
 export default function JoinLeagueInput() {
   const [code, setCode] = useState("");
@@ -18,11 +19,9 @@ export default function JoinLeagueInput() {
     setIsChecking(true);
 
     try {
-      // Check if league exists
-      const response = await fetch(`/api/leagues/check/${code}`);
-      const data = await response.json();
+      const exists = await checkLeagueExists(code);
 
-      if (data.exists) {
+      if (exists) {
         // League exists, redirect to join page
         router.push(`/join/${code}`);
       } else {

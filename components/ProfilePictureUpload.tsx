@@ -252,7 +252,7 @@ export default function ProfilePictureUpload({
             className="hidden"
           />
           <p className="text-xs text-muted-foreground">
-            {isSignup ? "Optional, up to 5MB" : "JPG, PNG up to 5MB"}
+            {isSignup ? "(Optional, up to 5MB)" : "JPG, PNG up to 5MB"}
           </p>
         </div>
       </div>

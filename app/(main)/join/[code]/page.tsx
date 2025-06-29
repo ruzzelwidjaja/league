@@ -8,6 +8,7 @@ import JoinLeagueForm from "./JoinLeagueForm";
 import * as motion from "motion/react-client";
 import Link from "next/link";
 import { Pool } from "pg";
+import { redirectToAuth } from "@/lib/actions/auth";
 
 interface League {
   id: string;
@@ -156,9 +157,7 @@ export default async function JoinLeaguePage({
         <div className="space-y-4">
           <form action={async () => {
             "use server";
-            await import("@/lib/actions/auth").then(({ redirectToAuth }) =>
-              redirectToAuth(code, 'signup')
-            );
+            await redirectToAuth(code, 'signup')
           }}>
             <Button
               type="submit"
@@ -171,9 +170,7 @@ export default async function JoinLeaguePage({
 
           <form action={async () => {
             "use server";
-            await import("@/lib/actions/auth").then(({ redirectToAuth }) =>
-              redirectToAuth(code, 'signin')
-            );
+            await redirectToAuth(code, 'signin')
           }}>
             <Button
               type="submit"
