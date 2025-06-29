@@ -8,11 +8,13 @@ import { Target, Clock } from "lucide-react";
 import type { League } from "@/lib/supabase/types";
 import type { UserAvailability } from "@/lib/supabase/types";
 import { motion } from "motion/react";
+import { joinLeague } from "@/lib/actions/leagues";
 
 export default function JoinLeagueForm({ league }: { league: League }) {
   const [selectedLevel, setSelectedLevel] = useState<string>("");
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [isJoining, setIsJoining] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const levels = [
@@ -66,28 +68,22 @@ export default function JoinLeagueForm({ league }: { league: League }) {
     if (!selectedLevel || selectedSlots.length === 0) return;
 
     setIsJoining(true);
+    setError("");
 
     try {
       const availability = buildAvailability();
 
-      const response = await fetch("/api/leagues/join", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          leagueId: league.id,
-          skillTier: selectedLevel,
-          availability,
-        }),
-      });
+      const result = await joinLeague(league.id, selectedLevel, availability);
 
-      if (response.ok) {
+      if (result.success) {
         router.push(`/league/${league.joinCode}`);
       } else {
-        console.error("Failed to join league");
-        setIsJoining(false);
+        setError(result.error || "Failed to join league");
       }
     } catch (error) {
       console.error("Error joining league:", error);
+      setError("Something went wrong. Please try again.");
+    } finally {
       setIsJoining(false);
     }
   };
@@ -108,6 +104,13 @@ export default function JoinLeagueForm({ league }: { league: League }) {
             <h1 className="text-3xl font-semibold text-foreground mb-4">Join {league.name}</h1>
             <p className="text-muted-foreground">Help us place you in the right starting position</p>
           </div>
+
+          {/* Error Display */}
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
 
           {/* Skill Level Selection */}
           <div className="space-y-4">
