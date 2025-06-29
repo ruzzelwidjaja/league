@@ -13,6 +13,7 @@ import "react-phone-number-input/style.css";
 import Image from "next/image";
 import PingPongIcon from "@/public/PingPongIcon.png";
 import Link from "next/link";
+import ProfilePictureUpload from "@/components/ProfilePictureUpload";
 
 const StyledPhoneInputWrapper = styled.div<{ $hasError: boolean }>`
   .PhoneInput {
@@ -68,6 +69,24 @@ const isValidIrishMobile = (number: string) => {
   return digits.match(/^(083|085|086|087|089)\d{7}$/) || digits.match(/^8[3-9]\d{7}$/);
 };
 
+// Upload profile picture after successful signup
+const uploadProfilePicture = async (userId: string, file: File) => {
+  const formData = new FormData();
+  formData.append('profilePicture', file);
+  formData.append('userId', userId);
+
+  const response = await fetch('/api/profile/upload-picture', {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to upload profile picture');
+  }
+
+  return response.json();
+};
+
 export default function SignUpForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -79,11 +98,16 @@ export default function SignUpForm() {
   const [phoneError, setPhoneError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // Get redirect URL and league code from search params
   const leagueCode = searchParams.get("league");
+
+  const handleImageChange = (file: File) => {
+    setProfilePicture(file);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,6 +153,16 @@ export default function SignUpForm() {
       }
 
       if (data?.user) {
+        // Upload profile picture if one was selected
+        if (profilePicture) {
+          try {
+            await uploadProfilePicture(data.user.id, profilePicture);
+          } catch (uploadError) {
+            console.warn('Profile picture upload failed, but account was created successfully:', uploadError);
+            toast.error('Account created, but profile picture upload failed. You can update it later in your profile.');
+          }
+        }
+
         // Show success state instead of immediately redirecting
         setSuccess(true);
       }
@@ -189,6 +223,15 @@ export default function SignUpForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Profile Picture Section */}
+        <ProfilePictureUpload
+          firstName={firstName}
+          lastName={lastName}
+          onImageChange={handleImageChange}
+          className="mb-6"
+          isSignup={true}
+        />
+
         <div className="grid grid-rows-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="firstName">First Name</Label>

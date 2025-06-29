@@ -26,6 +26,7 @@ interface ProfilePictureUploadProps {
   lastName?: string | null;
   onImageChange?: (file: File) => void;
   className?: string;
+  isSignup?: boolean;
 }
 
 export default function ProfilePictureUpload({
@@ -34,6 +35,7 @@ export default function ProfilePictureUpload({
   lastName,
   onImageChange,
   className = "",
+  isSignup = false,
 }: ProfilePictureUploadProps) {
   // Avatar editor states
   const [showEditor, setShowEditor] = useState(false);
@@ -240,7 +242,7 @@ export default function ProfilePictureUpload({
             className="gap-2"
           >
             <Camera className="w-4 h-4" />
-            Change Photo
+            {isSignup ? "Upload Photo" : "Change Photo"}
           </Button>
           <input
             ref={fileInputRef}
@@ -250,7 +252,7 @@ export default function ProfilePictureUpload({
             className="hidden"
           />
           <p className="text-xs text-muted-foreground">
-            JPG, PNG up to 5MB
+            {isSignup ? "Optional, up to 5MB" : "JPG, PNG up to 5MB"}
           </p>
         </div>
       </div>
