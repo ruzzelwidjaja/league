@@ -9,6 +9,7 @@ import * as motion from "motion/react-client";
 import { useRouter } from "next/navigation";
 import { getUserLeagueStatus } from "@/lib/actions/leagues";
 import { Button } from "@/components/ui/button";
+import LoadingAnimation from "@/components/LoadingAnimation";
 
 export default function JoinPage() {
   const { data: session, isPending } = useSession();
@@ -49,9 +50,7 @@ export default function JoinPage() {
   // Show loading state while checking session or league
   if (isPending || isCheckingLeague || (session?.user && !hasChecked.current)) {
     return (
-      <div className="min-h-svh flex items-center justify-center bg-background">
-        {/* Loading animation could go here */}
-      </div>
+      <LoadingAnimation />
     );
   }
 
