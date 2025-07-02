@@ -22,10 +22,6 @@ export const authClient = createAuthClient({
           type: "string",
           required: false,
         },
-        availability: {
-          type: "string",
-          required: false,
-        },
       }
     })
   ]

@@ -119,42 +119,25 @@ export async function joinLeague(
       return { success: false, error: 'Already a member of this league' }
     }
 
-    // 3. Get next rank and update user availability concurrently
-    const [rankResult, availabilityResult] = await Promise.all([
-      // Get next rank
-      supabase
-        .from('league_members')
-        .select('rank')
-        .eq('leagueId', leagueId)
-        .order('rank', { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+    // 3. Get next rank
+    const { data: rankData, error: rankError } = await supabase
+      .from('league_members')
+      .select('rank')
+      .eq('leagueId', leagueId)
+      .order('rank', { ascending: false })
+      .limit(1)
+      .maybeSingle()
 
-      // Update user availability
-      availability ? supabase
-        .from('user')
-        .update({
-          availability: availability,
-          updatedAt: new Date().toISOString()
-        })
-        .eq('id', userId) : Promise.resolve({ error: null })
-    ])
-
-    if (rankResult.error) {
-      console.error('Error getting rank:', rankResult.error)
+    if (rankError) {
+      console.error('Error getting rank:', rankError)
       return { success: false, error: 'Failed to determine rank' }
     }
 
-    if (availabilityResult.error) {
-      console.error('Error updating availability:', availabilityResult.error)
-      return { success: false, error: 'Failed to update availability' }
-    }
+    const nextRank = (rankData?.rank || 0) + 1
 
-    const nextRank = (rankResult.data?.rank || 0) + 1
-
-    // 4. Add user to league and log activity concurrently
+    // 4. Add user to league with availability and log activity concurrently
     const [memberResult, logResult] = await Promise.all([
-      // Add user to league
+      // Add user to league with availability stored in league_members
       supabase
         .from('league_members')
         .insert({
@@ -163,6 +146,7 @@ export async function joinLeague(
           rank: nextRank,
           skillTier,
           status: 'active',
+          availability: availability || {},
           joinedAt: new Date().toISOString()
         }),
 
