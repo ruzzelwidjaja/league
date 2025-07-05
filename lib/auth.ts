@@ -14,6 +14,8 @@ export const auth = betterAuth({
   trustedOrigins: [
     "http://localhost:3000",
     "http://10.16.61.31:3000",
+    "https://mocha.gg",
+    "https://www.mocha.gg",
   ],
   emailAndPassword: {
     enabled: true,
