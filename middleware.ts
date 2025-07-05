@@ -6,24 +6,6 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
   const isAuthenticated = !!sessionCookie;
 
-  // Enhanced debugging for production issues
-  const userAgent = request.headers.get('user-agent') || '';
-  const isMobile = /Mobile|Android|iPhone|iPad/.test(userAgent);
-  const cookieHeader = request.headers.get('cookie') || '';
-  const hasBetterAuthCookie = cookieHeader.includes('better-auth.session-token');
-
-  console.log('🔍 MIDDLEWARE DEBUG:', {
-    pathname,
-    isAuthenticated,
-    sessionCookie: !!sessionCookie,
-    isMobile,
-    hasBetterAuthCookie,
-    host: request.headers.get('host'),
-    referer: request.headers.get('referer'),
-    cookieCount: cookieHeader.split(';').length,
-    timestamp: new Date().toISOString()
-  });
-
   // Public routes that don't require authentication
   const publicRoutes = [
     '/',
