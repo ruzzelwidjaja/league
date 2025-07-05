@@ -17,11 +17,36 @@ export default function JoinPage() {
   const router = useRouter();
   const hasChecked = React.useRef(false);
 
+  // Debug logging
+  console.log('📱 JOIN PAGE DEBUG:', {
+    isPending,
+    hasSession: !!session,
+    hasUser: !!session?.user,
+    userId: session?.user?.id || 'none',
+    userEmail: session?.user?.email || 'none',
+    emailVerified: session?.user?.emailVerified || false,
+    isCheckingLeague,
+    hasChecked: hasChecked.current,
+    currentUrl: typeof window !== 'undefined' ? window.location.href : 'server',
+    userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'server',
+    timestamp: new Date().toISOString()
+  });
+
   // Check if authenticated user is in a league (only once per session)
   useEffect(() => {
+    console.log('🔄 USE_EFFECT TRIGGER:', {
+      hasUser: !!session?.user,
+      isCheckingLeague,
+      hasChecked: hasChecked.current,
+      shouldRun: !!(session?.user && !isCheckingLeague && !hasChecked.current)
+    });
+
     if (session?.user && !isCheckingLeague && !hasChecked.current) {
+      console.log('✅ STARTING LEAGUE CHECK for user:', session.user.email);
+
       // Check if email is verified first
       if (!session.user.emailVerified) {
+        console.log('❌ EMAIL NOT VERIFIED, redirecting to signin');
         // Redirect to sign-in with message about email verification
         router.replace('/auth/signin?message=Please check your email and verify your account');
         return;
@@ -29,19 +54,23 @@ export default function JoinPage() {
 
       hasChecked.current = true;
       setIsCheckingLeague(true);
+      console.log('📞 CALLING getUserLeagueStatus...');
 
       // Check if user is already in a league using Server Action
       getUserLeagueStatus()
         .then((leagueStatus) => {
+          console.log('📊 LEAGUE STATUS RESULT:', leagueStatus);
           if (leagueStatus.inLeague && leagueStatus.leagueCode) {
+            console.log('🏓 USER IN LEAGUE, redirecting to:', leagueStatus.leagueCode);
             // User is already in a league, redirect to their league
             router.replace(`/league/${leagueStatus.leagueCode}`);
           } else {
+            console.log('👤 USER NOT IN LEAGUE, showing join form');
             setIsCheckingLeague(false);
           }
         })
         .catch((error) => {
-          console.error("Error checking user league:", error);
+          console.error("❌ ERROR checking user league:", error);
           setIsCheckingLeague(false);
         });
     }
@@ -49,6 +78,12 @@ export default function JoinPage() {
 
   // Show loading state while checking session or league
   if (isPending || isCheckingLeague || (session?.user && !hasChecked.current)) {
+    console.log('🔄 SHOWING LOADING ANIMATION:', {
+      isPending,
+      isCheckingLeague,
+      hasUserButNotChecked: !!(session?.user && !hasChecked.current),
+      reason: isPending ? 'pending' : isCheckingLeague ? 'checking' : 'not-checked'
+    });
     return (
       <LoadingAnimation />
     );
@@ -56,6 +91,7 @@ export default function JoinPage() {
 
   // If no session, redirect to signin (this should be handled by middleware, but just in case)
   if (!session?.user) {
+    console.log('🚫 NO SESSION/USER, redirecting to signin');
     router.replace('/auth/signin');
     return null;
   }
@@ -66,6 +102,8 @@ export default function JoinPage() {
   };
 
   // User is authenticated, verified, and not in a league - show join form
+  console.log('✨ SHOWING JOIN FORM for user:', session.user.email);
+
   return (
     <main className="min-h-svh flex items-center justify-center p-8">
       <motion.div
@@ -109,6 +147,16 @@ export default function JoinPage() {
             Sign Out
           </Button>
         </div>
+
+        {/* Debug info visible on page (easier for mobile debugging) */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 p-2 bg-gray-100 rounded text-xs">
+            <strong>Debug:</strong> User: {session.user.email} |
+            Verified: {session.user.emailVerified ? 'Yes' : 'No'} |
+            Checked: {hasChecked.current ? 'Yes' : 'No'} |
+            Time: {new Date().toLocaleTimeString()}
+          </div>
+        )}
       </motion.div>
     </main>
   );
