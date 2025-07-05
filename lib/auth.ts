@@ -10,7 +10,7 @@ export const auth = betterAuth({
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
   }),
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || process.env.BETTER_AUTH_URL || "http://localhost:3000",
   trustedOrigins: [
     "http://localhost:3000",
     "http://10.16.61.31:3000",
@@ -81,7 +81,7 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 30, // 30 days (1 month)
     updateAge: 60 * 60 * 24, // 1 day (refresh session every day if user is active)
     cookieCache: {
-      enabled: true,
+      enabled: false, // Temporarily disabled to fix production auth issues
       maxAge: 5 * 60 // 5 minutes
     }
   },

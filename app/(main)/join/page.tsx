@@ -14,8 +14,22 @@ import LoadingAnimation from "@/components/LoadingAnimation";
 export default function JoinPage() {
   const { data: session, isPending } = useSession();
   const [isCheckingLeague, setIsCheckingLeague] = useState(false);
+  const [manualSessionCheck, setManualSessionCheck] = useState<unknown>(null);
   const router = useRouter();
   const hasChecked = React.useRef(false);
+
+  // Manual session check for debugging
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      authClient.getSession().then((result) => {
+        console.log('🔍 MANUAL SESSION CHECK:', result);
+        setManualSessionCheck(result);
+      }).catch((error) => {
+        console.log('❌ MANUAL SESSION ERROR:', error);
+        setManualSessionCheck({ error: error.message });
+      });
+    }
+  }, []);
 
   // Debug logging
   console.log('📱 JOIN PAGE DEBUG:', {
@@ -29,7 +43,11 @@ export default function JoinPage() {
     hasChecked: hasChecked.current,
     currentUrl: typeof window !== 'undefined' ? window.location.href : 'server',
     userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'server',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    // Additional debugging for auth issues
+    cookies: typeof window !== 'undefined' ? document.cookie : 'server',
+    sessionObject: session,
+    manualSessionCheck
   });
 
   // Check if authenticated user is in a league (only once per session)
