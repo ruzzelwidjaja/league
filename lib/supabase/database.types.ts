@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          operationName?: string
-          query?: string
           variables?: Json
           extensions?: Json
+          operationName?: string
+          query?: string
         }
         Returns: Json
       }
@@ -154,6 +154,7 @@ export type Database = {
       }
       challenges: {
         Row: {
+          cancelledBy: string | null
           challengedId: string | null
           challengerId: string | null
           completedAt: string | null
@@ -166,11 +167,12 @@ export type Database = {
           respondedAt: string | null
           scoreSubmittedAt: string | null
           scoreSubmittedBy: string | null
-          selectedSlot: string | null
+          selectedSlot: Json | null
           status: string | null
           winnerId: string | null
         }
         Insert: {
+          cancelledBy?: string | null
           challengedId?: string | null
           challengerId?: string | null
           completedAt?: string | null
@@ -183,11 +185,12 @@ export type Database = {
           respondedAt?: string | null
           scoreSubmittedAt?: string | null
           scoreSubmittedBy?: string | null
-          selectedSlot?: string | null
+          selectedSlot?: Json | null
           status?: string | null
           winnerId?: string | null
         }
         Update: {
+          cancelledBy?: string | null
           challengedId?: string | null
           challengerId?: string | null
           completedAt?: string | null
@@ -200,11 +203,18 @@ export type Database = {
           respondedAt?: string | null
           scoreSubmittedAt?: string | null
           scoreSubmittedBy?: string | null
-          selectedSlot?: string | null
+          selectedSlot?: Json | null
           status?: string | null
           winnerId?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "challenges_cancelledBy_fkey"
+            columns: ["cancelledBy"]
+            isOneToOne: false
+            referencedRelation: "user"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "challenges_challengedId_fkey"
             columns: ["challengedId"]
@@ -253,6 +263,7 @@ export type Database = {
           previousRank: number | null
           rank: number
           recentAcceptances: number | null
+          recentCancellations: number | null
           recentRejections: number | null
           skillTier: string
           status: string | null
@@ -268,6 +279,7 @@ export type Database = {
           previousRank?: number | null
           rank: number
           recentAcceptances?: number | null
+          recentCancellations?: number | null
           recentRejections?: number | null
           skillTier: string
           status?: string | null
@@ -283,6 +295,7 @@ export type Database = {
           previousRank?: number | null
           rank?: number
           recentAcceptances?: number | null
+          recentCancellations?: number | null
           recentRejections?: number | null
           skillTier?: string
           status?: string | null
@@ -355,7 +368,6 @@ export type Database = {
           endDate: string
           id: string
           leagueId: string | null
-          startDate: string
           userId: string | null
         }
         Insert: {
@@ -363,7 +375,6 @@ export type Database = {
           endDate: string
           id?: string
           leagueId?: string | null
-          startDate: string
           userId?: string | null
         }
         Update: {
@@ -371,7 +382,6 @@ export type Database = {
           endDate?: string
           id?: string
           leagueId?: string | null
-          startDate?: string
           userId?: string | null
         }
         Relationships: [

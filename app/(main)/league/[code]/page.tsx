@@ -59,7 +59,7 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
   };
 
   return (
-    <main className="p-6">
+    <main className="p-4">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-1 gap-4 pb-4">

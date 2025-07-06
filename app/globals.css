@@ -64,7 +64,8 @@
   /* --muted: oklch(0.97 0 0); */
   /* --muted: oklch(0.997 0.0141 106.57); */
   /* --muted: #f0e5db; */
-  --muted: #f2ede9;
+  /* --muted: #f2ede9; */
+  --muted: color-mix(in oklab, var(--primary) 12%, transparent);
   --muted-foreground: oklch(0.556 0 0);
   /* --accent: oklch(0.97 0 0); */
   /* --accent: oklch(fdfd); */

@@ -2,6 +2,10 @@ import React from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Clock } from "lucide-react";
+import type { Json } from "@/lib/supabase/database.types";
 
 interface User {
   id: string;
@@ -11,6 +15,12 @@ interface User {
   organizationName?: string | null;
 }
 
+interface Availability {
+  [day: string]: {
+    [timeSlot: string]: boolean;
+  };
+}
+
 interface Member {
   id: string;
   rank: number;
@@ -18,6 +28,13 @@ interface Member {
   status: string | null;
   joinedAt: string | null;
   userId: string | null;
+  recentRejections: number | null;
+  recentAcceptances: number | null;
+  recentCancellations: number | null;
+  activityWindowStart: string | null;
+  previousRank: number | null;
+  availability: Json | null;
+  ootDaysUsed: number | null;
   user: User | null;
 }
 
@@ -27,6 +44,7 @@ interface LadderContentProps {
 }
 
 export function LadderContent({ members, currentUserId }: LadderContentProps) {
+  console.log('members--->', members);
   const getInitials = (firstName?: string | null, lastName?: string | null) => {
     if (firstName && lastName) {
       return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -55,20 +73,48 @@ export function LadderContent({ members, currentUserId }: LadderContentProps) {
     return false;
   };
 
+  // Check if two players have similar availability
+  const hasSimilarAvailability = (userAvailability: Json | null, otherAvailability: Json | null) => {
+    if (!userAvailability || !otherAvailability) return false;
+    
+    // Type guard to check if the Json is an Availability object
+    const isAvailability = (obj: Json): obj is Availability => {
+      return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
+    };
+    
+    if (!isAvailability(userAvailability) || !isAvailability(otherAvailability)) return false;
+    
+    // Check if they have any overlapping available time slots
+    for (const day in userAvailability) {
+      if (otherAvailability[day]) {
+        for (const timeSlot in userAvailability[day]) {
+          if (userAvailability[day][timeSlot] && otherAvailability[day][timeSlot]) {
+            return true; // Found at least one overlapping available time slot
+          }
+        }
+      }
+    }
+    
+    return false;
+  };
+
+  // Get current user's availability
+  const currentUserAvailability = currentUser?.availability || null;
+
   return (
-    <div className="divide-y divide-gray-100">
-      {sortedMembers.map((member) => {
+    <div>
+      {sortedMembers.map((member, index) => {
         const isCurrentUser = member.user?.id === currentUserId;
         
         return (
-          <div
-            key={member.id}
-            className={`py-4 flex items-center gap-3 transition-colors ${
-              isCurrentUser 
-                ? 'bg-muted border border-primary/20 rounded-lg px-3' 
-                : null
-            }`}
-          >
+          <React.Fragment key={member.id}>
+            <div
+              className={`py-4 flex items-center gap-3 transition-colors ${
+                isCurrentUser 
+                  ? 'bg-muted border border-primary/20 rounded-lg px-3' 
+                  : null
+              }`}
+            >
             {/* Rank */}
             <div className="w-8 text-center">
               <span className={`text-sm font-medium text-muted-foreground`}>
@@ -93,6 +139,18 @@ export function LadderContent({ members, currentUserId }: LadderContentProps) {
                 <p className={`text-sm font-medium truncate text-gray-900`}>
                   {member.user?.firstName} {member.user?.lastName}
                 </p>
+                {!isCurrentUser && hasSimilarAvailability(currentUserAvailability, member.availability) && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 hover:bg-green-200">
+                        <Clock className="w-3 h-3" />
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Similar availability</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
               {member.user?.organizationName && (
                 <p className="text-xs text-muted-foreground mt-0.5 truncate">
@@ -124,7 +182,15 @@ export function LadderContent({ members, currentUserId }: LadderContentProps) {
                 
               )}
             </div>
-          </div>
+            </div>
+            
+            {/* Divider - 90% width, not after last item */}
+            {index < sortedMembers.length - 1 && (
+              <div className="w-full flex justify-center">
+                <div className="w-[95%] h-px bg-gray-100"></div>
+              </div>
+            )}
+          </React.Fragment>
         );
       })}
 

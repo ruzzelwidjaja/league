@@ -270,6 +270,13 @@ export async function getLeagueMembers(leagueId: string): Promise<{
     status: string | null;
     joinedAt: string | null;
     userId: string | null;
+    recentRejections: number | null;
+    recentAcceptances: number | null;
+    recentCancellations: number | null;
+    activityWindowStart: string | null;
+    previousRank: number | null;
+    availability: Json | null;
+    ootDaysUsed: number | null;
     user: {
       id: string;
       firstName: string | null;
@@ -292,6 +299,13 @@ export async function getLeagueMembers(leagueId: string): Promise<{
         status,
         joinedAt,
         userId,
+        recentRejections,
+        recentAcceptances,
+        recentCancellations,
+        activityWindowStart,
+        previousRank,
+        availability,
+        ootDaysUsed,
         user:userId (
           id,
           firstName,
