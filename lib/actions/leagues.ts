@@ -214,8 +214,16 @@ export async function getLeagueByCode(code: string): Promise<{
   }
 }
 
-export async function checkUserMembership(userId: string, leagueId: string): Promise<{
+export async function getUserMembershipData(userId: string, leagueId: string): Promise<{
   isMember: boolean;
+  membershipData?: {
+    id: string;
+    rank: number;
+    previousRank?: number;
+    skillTier: string;
+    status: string | null;
+    joinedAt: string | null;
+  };
   error?: string;
 }> {
   try {
@@ -223,7 +231,7 @@ export async function checkUserMembership(userId: string, leagueId: string): Pro
 
     const { data, error } = await supabase
       .from('league_members')
-      .select('id')
+      .select('id, rank, previousRank, skillTier, status, joinedAt')
       .eq('userId', userId)
       .eq('leagueId', leagueId)
       .maybeSingle();
@@ -233,9 +241,23 @@ export async function checkUserMembership(userId: string, leagueId: string): Pro
       return { isMember: false, error: 'Failed to check membership' };
     }
 
-    return { isMember: !!data };
+    if (!data) {
+      return { isMember: false };
+    }
+
+    return { 
+      isMember: true, 
+      membershipData: {
+        id: data.id,
+        rank: data.rank,
+        previousRank: data.previousRank ?? undefined,
+        skillTier: data.skillTier,
+        status: data.status,
+        joinedAt: data.joinedAt
+      }
+    };
   } catch (error) {
-    console.error('Error checking user membership:', error);
+    console.error('Error getting user membership data:', error);
     return { isMember: false, error: 'Internal server error' };
   }
 }
