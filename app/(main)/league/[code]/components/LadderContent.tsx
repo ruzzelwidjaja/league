@@ -1,0 +1,160 @@
+import React from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+
+interface User {
+  id: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  image?: string | null;
+  organizationName?: string | null;
+}
+
+interface Member {
+  id: string;
+  rank: number;
+  skillTier: string;
+  status: string | null;
+  joinedAt: string | null;
+  userId: string | null;
+  user: User | null;
+}
+
+interface LadderContentProps {
+  members: Member[];
+  currentUserId: string;
+}
+
+export function LadderContent({ members, currentUserId }: LadderContentProps) {
+  const getInitials = (firstName?: string | null, lastName?: string | null) => {
+    if (firstName && lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    }
+    if (firstName) {
+      return firstName.charAt(0).toUpperCase();
+    }
+    return "U";
+  };
+
+  // Sort members by rank (lower rank number = better position)
+  const sortedMembers = [...members].sort((a, b) => a.rank - b.rank);
+  
+  // Get current user's rank
+  const currentUser = members.find(m => m.user?.id === currentUserId);
+  const currentUserRank = currentUser?.rank || 0;
+  
+  // Check if a player can be challenged
+  const canChallenge = (targetRank: number) => {
+    // Can challenge players above you (lower rank number)
+    if (targetRank < currentUserRank) return true;
+    
+    // Can challenge players within 3 ranks below you
+    if (targetRank > currentUserRank && targetRank <= currentUserRank + 3) return true;
+    
+    return false;
+  };
+
+  return (
+    <div className="divide-y divide-gray-100">
+      {sortedMembers.map((member) => {
+        const isCurrentUser = member.user?.id === currentUserId;
+        
+        return (
+          <div
+            key={member.id}
+            className={`py-4 flex items-center gap-3 transition-colors ${
+              isCurrentUser 
+                ? 'bg-muted border border-primary/20 rounded-lg px-3' 
+                : null
+            }`}
+          >
+            {/* Rank */}
+            <div className="w-8 text-center">
+              <span className={`text-sm font-medium text-muted-foreground`}>
+                {member.rank}
+              </span>
+            </div>
+
+            {/* Avatar */}
+            <Avatar className="size-10">
+              <AvatarImage
+                src={member.user?.image || undefined}
+                alt={`${member.user?.firstName} ${member.user?.lastName}`}
+              />
+              <AvatarFallback className="text-xs font-medium bg-primary text-primary-foreground">
+                {getInitials(member.user?.firstName, member.user?.lastName)}
+              </AvatarFallback>
+            </Avatar>
+
+            {/* Player Info */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <p className={`text-sm font-medium truncate text-gray-900`}>
+                  {member.user?.firstName} {member.user?.lastName}
+                </p>
+              </div>
+              {member.user?.organizationName && (
+                <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                  {member.user.organizationName}
+                </p>
+              )}
+            </div>
+
+            {/* Right side - You tag or Challenge button */}
+            <div className="text-right">
+              {isCurrentUser ? (
+                <div className="bg-primary text-primary-foreground px-2 py-0.5 mr-2 rounded-md text-xs font-medium">
+                  You
+                </div>
+              ) : (
+                canChallenge(member.rank) ? (
+                  <Button 
+                    size="xs" 
+                    variant="outline"
+                    title="Challenge this player"
+                  >
+                    Challenge
+                  </Button>
+                ) : (
+                  <div className="text-xs text-muted-foreground mr-2.5">
+                      Unavailable
+                  </div>
+                )
+                
+              )}
+            </div>
+          </div>
+        );
+      })}
+
+      {(!members || members.length === 0) && (
+        <div className="py-8 text-center text-muted-foreground">
+          <p>No players in the ladder yet.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function LadderSkeleton() {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="rounded-lg p-3 flex items-center gap-3">
+          <div className="w-8 text-center">
+            <Skeleton className="h-4 w-6 mx-auto" />
+          </div>
+          <Skeleton className="size-10 rounded-full" />
+          <div className="min-w-0 flex-1">
+            <Skeleton className="h-4 w-32 mb-1" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+          <div className="text-right">
+            <Skeleton className="h-3 w-16" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+} 

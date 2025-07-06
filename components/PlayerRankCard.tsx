@@ -22,7 +22,7 @@ export function PlayerRankCard({ currentRank, previousRank }: PlayerRankCardProp
   const rankDifference = previousRank ? Math.abs(currentRank - previousRank) : 0;
 
   return (
-    <InfoBox variant="default">
+    <InfoBox variant="transparent">
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-xs text-gray-500 mb-1">Current rank</p>

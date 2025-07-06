@@ -10,6 +10,7 @@ const infoBoxVariants = cva(
       variant: {
         default: "bg-muted border-border text-muted-foreground",
         accent: "bg-primary/10 border-primary/20 text-foreground",
+        transparent: "bg-transparent border-border text-foreground",
       },
     },
     defaultVariants: {
