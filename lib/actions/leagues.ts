@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
-import type { UserAvailability } from '@/lib/supabase/types'
+import type { UserAvailability, League } from '@/lib/supabase/types'
 import type { Json } from '@/lib/supabase/database.types'
 
 export async function checkLeagueExists(code: string): Promise<boolean> {
@@ -186,5 +186,109 @@ export async function joinLeague(
   } catch (error) {
     console.error('Error joining league:', error)
     return { success: false, error: 'Internal server error' }
+  }
+}
+
+export async function getLeagueByCode(code: string): Promise<{
+  league: League | null;
+  error?: string;
+}> {
+  try {
+    const supabase = await createClient();
+
+    const { data: league, error } = await supabase
+      .from('leagues')
+      .select('*')
+      .eq('joinCode', code)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching league:', error);
+      return { league: null, error: 'Failed to fetch league' };
+    }
+
+    return { league };
+  } catch (error) {
+    console.error('Error getting league by code:', error);
+    return { league: null, error: 'Internal server error' };
+  }
+}
+
+export async function checkUserMembership(userId: string, leagueId: string): Promise<{
+  isMember: boolean;
+  error?: string;
+}> {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from('league_members')
+      .select('id')
+      .eq('userId', userId)
+      .eq('leagueId', leagueId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking membership:', error);
+      return { isMember: false, error: 'Failed to check membership' };
+    }
+
+    return { isMember: !!data };
+  } catch (error) {
+    console.error('Error checking user membership:', error);
+    return { isMember: false, error: 'Internal server error' };
+  }
+}
+
+export async function getLeagueMembers(leagueId: string): Promise<{
+  members: Array<{
+    id: string;
+    rank: number;
+    skillTier: string;
+    status: string | null;
+    joinedAt: string | null;
+    userId: string | null;
+    user: {
+      id: string;
+      firstName: string | null;
+      lastName: string | null;
+      organizationName: string | null;
+      image: string | null;
+    } | null;
+  }>;
+  error?: string;
+}> {
+  try {
+    const supabase = await createClient();
+
+    const { data: members, error } = await supabase
+      .from('league_members')
+      .select(`
+        id,
+        rank,
+        skillTier,
+        status,
+        joinedAt,
+        userId,
+        user:userId (
+          id,
+          firstName,
+          lastName,
+          organizationName,
+          image
+        )
+      `)
+      .eq('leagueId', leagueId)
+      .order('joinedAt', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching league members:', error);
+      return { members: [], error: 'Failed to fetch members' };
+    }
+
+    return { members: members || [] };
+  } catch (error) {
+    console.error('Error getting league members:', error);
+    return { members: [], error: 'Internal server error' };
   }
 }
