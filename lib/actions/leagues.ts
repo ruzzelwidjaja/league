@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import type { UserAvailability } from '@/lib/supabase/types'
+import type { Json } from '@/lib/supabase/database.types'
 
 export async function checkLeagueExists(code: string): Promise<boolean> {
   try {
@@ -63,6 +64,10 @@ export async function getUserLeagueStatus(): Promise<{
     }
 
     // 3. Get the league's joinCode in a separate query for clarity
+    if (!data.leagueId) {
+      return { inLeague: false, leagueCode: null, error: 'Invalid league data' }
+    }
+
     const { data: leagueData, error: leagueError } = await supabase
       .from('leagues')
       .select('joinCode')
@@ -146,7 +151,7 @@ export async function joinLeague(
           rank: nextRank,
           skillTier,
           status: 'active',
-          availability: availability || {},
+          availability: (availability || {}) as Json,
           joinedAt: new Date().toISOString()
         }),
 
