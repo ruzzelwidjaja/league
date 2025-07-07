@@ -223,6 +223,7 @@ export async function getUserMembershipData(userId: string, leagueId: string): P
     skillTier: string;
     status: string | null;
     joinedAt: string | null;
+    availability: Json | null;
   };
   error?: string;
 }> {
@@ -231,7 +232,7 @@ export async function getUserMembershipData(userId: string, leagueId: string): P
 
     const { data, error } = await supabase
       .from('league_members')
-      .select('id, rank, previousRank, skillTier, status, joinedAt')
+      .select('id, rank, previousRank, skillTier, status, joinedAt, availability')
       .eq('userId', userId)
       .eq('leagueId', leagueId)
       .maybeSingle();
@@ -253,7 +254,8 @@ export async function getUserMembershipData(userId: string, leagueId: string): P
         previousRank: data.previousRank ?? undefined,
         skillTier: data.skillTier,
         status: data.status,
-        joinedAt: data.joinedAt
+        joinedAt: data.joinedAt,
+        availability: data.availability
       }
     };
   } catch (error) {

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Clock } from "lucide-react";
 import type { Json } from "@/lib/supabase/database.types";
+import { ChallengeModal } from "@/components/ChallengeModal";
 
 interface User {
   id: string;
@@ -41,10 +42,12 @@ interface Member {
 interface LadderContentProps {
   members: Member[];
   currentUserId: string;
+  currentUserAvailability: Json | null;
+  currentUserRank: number;
+  leagueId: string;
 }
 
-export function LadderContent({ members, currentUserId }: LadderContentProps) {
-  console.log('members--->', members);
+export function LadderContent({ members, currentUserId, currentUserAvailability, currentUserRank, leagueId }: LadderContentProps) {
   const getInitials = (firstName?: string | null, lastName?: string | null) => {
     if (firstName && lastName) {
       return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -57,10 +60,6 @@ export function LadderContent({ members, currentUserId }: LadderContentProps) {
 
   // Sort members by rank (lower rank number = better position)
   const sortedMembers = [...members].sort((a, b) => a.rank - b.rank);
-  
-  // Get current user's rank
-  const currentUser = members.find(m => m.user?.id === currentUserId);
-  const currentUserRank = currentUser?.rank || 0;
   
   // Check if a player can be challenged
   const canChallenge = (targetRank: number) => {
@@ -98,8 +97,6 @@ export function LadderContent({ members, currentUserId }: LadderContentProps) {
     return false;
   };
 
-  // Get current user's availability
-  const currentUserAvailability = currentUser?.availability || null;
 
   return (
     <div>
@@ -167,13 +164,27 @@ export function LadderContent({ members, currentUserId }: LadderContentProps) {
                 </div>
               ) : (
                 canChallenge(member.rank) ? (
-                  <Button 
-                    size="xs" 
-                    variant="outline"
-                    title="Challenge this player"
+                  <ChallengeModal
+                    challengedUser={{
+                      id: member.userId || '',
+                      firstName: member.user?.firstName || null,
+                      lastName: member.user?.lastName || null,
+                      image: member.user?.image || null,
+                      rank: member.rank,
+                      availability: member.availability
+                    }}
+                    currentUserAvailability={currentUserAvailability}
+                    currentUserRank={currentUserRank}
+                    leagueId={leagueId}
                   >
-                    Challenge
-                  </Button>
+                    <Button 
+                      size="xs" 
+                      variant="outline"
+                      title="Challenge this player"
+                    >
+                      Challenge
+                    </Button>
+                  </ChallengeModal>
                 ) : (
                   <div className="text-xs text-muted-foreground mr-2.5">
                       Unavailable

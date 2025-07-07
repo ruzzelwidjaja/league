@@ -87,6 +87,9 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
                   <LadderContent 
                     members={members || []}
                     currentUserId={session.user.id}
+                    currentUserAvailability={membershipData.availability || null}
+                    currentUserRank={membershipData.rank}
+                    leagueId={league.id}
                   />
                 </Suspense>
               </TabsContent>
