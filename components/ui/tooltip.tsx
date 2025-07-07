@@ -5,34 +5,92 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
-function TooltipProvider({
-  delayDuration = 0,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
+function useHasHover() {
+  try {
+    return matchMedia('(hover: hover)').matches
+  } catch {
+    // Assume that if browser too old to support matchMedia it's likely not a touch device
+    return true
+  }
+}
+
+type TooltipTriggerContextType = {
+  supportMobileTap: boolean;
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const TooltipTriggerContext = React.createContext<TooltipTriggerContextType>({
+  supportMobileTap: false,
+  open: false,
+  setOpen: () => {},
+});
+
+const TooltipProvider = TooltipPrimitive.Provider;
+
+const Tooltip: React.FC<
+  TooltipPrimitive.TooltipProps & { supportMobileTap?: boolean }
+> = ({ children, ...props }) => {
+  const [open, setOpen] = React.useState<boolean>(props.defaultOpen ?? false);
+  const hasHover = useHasHover();
+
   return (
-    <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
-      delayDuration={delayDuration}
+    <TooltipPrimitive.Root
+      data-slot="tooltip"
+      delayDuration={
+        !hasHover && props.supportMobileTap ? 0 : props.delayDuration
+      }
+      onOpenChange={setOpen}
+      open={open}
       {...props}
-    />
-  )
-}
+    >
+      <TooltipTriggerContext.Provider
+        value={{
+          open,
+          setOpen,
+          supportMobileTap: props.supportMobileTap ?? false,
+        }}
+      >
+        {children}
+      </TooltipTriggerContext.Provider>
+    </TooltipPrimitive.Root>
+  );
+};
+Tooltip.displayName = TooltipPrimitive.Root.displayName;
 
-function Tooltip({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Root>) {
+const TooltipTrigger = React.forwardRef<
+  React.ElementRef<typeof TooltipPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Trigger>
+>(({ children, ...props }, ref) => {
+  const hasHover = useHasHover();
+  const { setOpen, supportMobileTap } = React.useContext(TooltipTriggerContext);
+
+  const { onClick: onClickProp } = props;
+
+  const onClick = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (!hasHover && supportMobileTap) {
+        e.preventDefault();
+        setOpen(true);
+      } else {
+        onClickProp?.(e);
+      }
+    },
+    [setOpen, hasHover, supportMobileTap, onClickProp],
+  );
+
   return (
-    <TooltipProvider>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-    </TooltipProvider>
-  )
-}
-
-function TooltipTrigger({
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
-}
+    <TooltipPrimitive.Trigger 
+      ref={ref} 
+      data-slot="tooltip-trigger" 
+      {...props} 
+      onClick={onClick}
+    >
+      {children}
+    </TooltipPrimitive.Trigger>
+  );
+});
+TooltipTrigger.displayName = TooltipPrimitive.Trigger.displayName;
 
 function TooltipContent({
   className,

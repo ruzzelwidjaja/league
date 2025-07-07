@@ -3,7 +3,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { Clock } from "lucide-react";
 import type { Json } from "@/lib/supabase/database.types";
 import { ChallengeModal } from "./ChallengeModal";
@@ -195,16 +195,18 @@ export function LadderContent({ members, currentUserId, currentUserAvailability,
                   {member.user?.firstName} {member.user?.lastName}
                 </p>
                 {!isCurrentUser && hasSimilarAvailability(currentUserAvailability, member.availability) && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 hover:bg-green-200">
-                        <Clock className="w-3 h-3" />
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Similar availability</p>
-                    </TooltipContent>
-                  </Tooltip>
+                  <TooltipProvider>
+                    <Tooltip supportMobileTap={true}>
+                      <TooltipTrigger asChild>
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 hover:bg-green-200">
+                          <Clock className="w-3 h-3" />
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Similar availability</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
               {member.user?.organizationName && (
