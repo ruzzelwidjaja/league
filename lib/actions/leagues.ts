@@ -362,3 +362,108 @@ export async function getUserPendingChallenges(userId: string, leagueId: string)
     return { challenges: [], error: 'Internal server error' };
   }
 }
+
+export async function getDetailedChallenges(userId: string, leagueId: string): Promise<{
+  challenges: Array<{
+    id: string;
+    challengerId: string | null;
+    challengedId: string | null;
+    status: string | null;
+    createdAt: string | null;
+    proposedSlots: Json | null;
+    selectedSlot: Json | null;
+    challenger?: {
+      id: string;
+      firstName: string | null;
+      lastName: string | null;
+      image: string | null;
+      organizationName: string | null;
+    } | null;
+    challenged?: {
+      id: string;
+      firstName: string | null;
+      lastName: string | null;
+      image: string | null;
+      organizationName: string | null;
+    } | null;
+    challengerRank?: number;
+    challengedRank?: number;
+  }>;
+  error?: string;
+}> {
+  try {
+    const supabase = await createClient();
+
+    // Get challenges first
+    const { data: challenges, error } = await supabase
+      .from('challenges')
+      .select('id, challengerId, challengedId, status, createdAt, proposedSlots, selectedSlot')
+      .eq('leagueId', leagueId)
+      .or(`challengerId.eq.${userId},challengedId.eq.${userId}`)
+      .in('status', ['pending', 'accepted', 'rejected'])
+      .order('createdAt', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching detailed challenges:', error);
+      return { challenges: [], error: 'Failed to fetch challenges' };
+    }
+
+    // Get user details and ranks for each challenge
+    const challengesWithDetails = await Promise.all((challenges || []).map(async (challenge) => {
+      let challenger = null, challenged = null, challengerRank = undefined, challengedRank = undefined;
+
+      // Get challenger details and rank
+      if (challenge.challengerId) {
+        const [userResult, memberResult] = await Promise.all([
+          supabase
+            .from('user')
+            .select('id, firstName, lastName, image, organizationName')
+            .eq('id', challenge.challengerId)
+            .single(),
+          supabase
+            .from('league_members')
+            .select('rank')
+            .eq('userId', challenge.challengerId)
+            .eq('leagueId', leagueId)
+            .single()
+        ]);
+        
+        challenger = userResult.data;
+        challengerRank = memberResult.data?.rank;
+      }
+
+      // Get challenged details and rank
+      if (challenge.challengedId) {
+        const [userResult, memberResult] = await Promise.all([
+          supabase
+            .from('user')
+            .select('id, firstName, lastName, image, organizationName')
+            .eq('id', challenge.challengedId)
+            .single(),
+          supabase
+            .from('league_members')
+            .select('rank')
+            .eq('userId', challenge.challengedId)
+            .eq('leagueId', leagueId)
+            .single()
+        ]);
+        
+        challenged = userResult.data;
+        challengedRank = memberResult.data?.rank;
+      }
+
+      return {
+        ...challenge,
+        challenger,
+        challenged,
+        challengerRank,
+        challengedRank
+      };
+    }));
+
+    return { challenges: challengesWithDetails };
+  } catch (error) {
+    console.error('Error getting detailed challenges:', error);
+    return { challenges: [], error: 'Internal server error' };
+  }
+}

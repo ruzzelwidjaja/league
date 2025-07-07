@@ -254,7 +254,7 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
   };
 
   return (
-    <div className="p-6 pt-2 max-w-2xl mx-auto">
+    <div className="p-6 pt-2 max-w-2xl mx-auto overflow-y-auto">
       <div className="flex items-center gap-3 mb-5">
         <Avatar className="size-9">
           <AvatarImage src={challengedUser.image || undefined} alt={`${challengedUser.firstName} ${challengedUser.lastName}`} />

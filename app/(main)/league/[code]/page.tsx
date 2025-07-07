@@ -3,11 +3,12 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import UserDropdown from "./components/UserDropdown";
 import { headers } from "next/headers";
-import { getLeagueByCode, getUserMembershipData, getLeagueMembers, getUserPendingChallenges } from "@/lib/actions/leagues";
+import { getLeagueByCode, getUserMembershipData, getLeagueMembers, getUserPendingChallenges, getDetailedChallenges } from "@/lib/actions/leagues";
 import { LeaguePreStart } from "./components/LeaguePreStart";
 import { PlayerRankCard } from "@/components/PlayerRankCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LadderContent, LadderSkeleton } from "./components/LadderContent";
+import { ChallengesContent, ChallengesSkeleton } from "./components/ChallengesContent";
 import { Suspense } from "react";
 
 interface LeaguePageProps {
@@ -45,10 +46,11 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
     redirect(`/join/${code}`);
   }
 
-  // Get all members with user details and pending challenges
-  const [membersResult, challengesResult] = await Promise.all([
+  // Get all members with user details and challenge data
+  const [membersResult, challengesResult, detailedChallengesResult] = await Promise.all([
     getLeagueMembers(league.id),
-    getUserPendingChallenges(session.user.id, league.id)
+    getUserPendingChallenges(session.user.id, league.id),
+    getDetailedChallenges(session.user.id, league.id)
   ]);
 
   if (membersResult.error) {
@@ -59,8 +61,13 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
     return <div>Error loading challenges</div>;
   }
 
+  if (detailedChallengesResult.error) {
+    return <div>Error loading detailed challenges</div>;
+  }
+
   const { members } = membersResult;
   const { challenges } = challengesResult;
+  const { challenges: detailedChallenges } = detailedChallengesResult;
 
   // Check if league has started
   const hasLeagueStarted = () => {
@@ -108,10 +115,14 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
                 </Suspense>
               </TabsContent>
               
-              <TabsContent value="challenges" className="mt-4">
-                <div className="py-8 text-center text-muted-foreground">
-                  <p>TODO: Challenges</p>
-                </div>
+              <TabsContent value="challenges" className="mt-2">
+                <Suspense fallback={<ChallengesSkeleton />}>
+                  <ChallengesContent 
+                    challenges={detailedChallenges || []}
+                    currentUserId={session.user.id}
+                    currentUserRank={membershipData.rank}
+                  />
+                </Suspense>
               </TabsContent>
               
               <TabsContent value="history" className="mt-4">
