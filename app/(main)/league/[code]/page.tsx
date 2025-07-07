@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import UserDropdown from "./components/UserDropdown";
 import { headers } from "next/headers";
-import { getLeagueByCode, getUserMembershipData, getLeagueMembers, getUserPendingChallenges, getDetailedChallenges } from "@/lib/actions/leagues";
+import { getLeagueByCode, getUserMembershipData, getLeagueMembers, getDetailedChallenges } from "@/lib/actions/leagues";
 import { LeaguePreStart } from "./components/LeaguePreStart";
 import { PlayerRankCard } from "@/components/PlayerRankCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -47,9 +47,8 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
   }
 
   // Get all members with user details and challenge data
-  const [membersResult, challengesResult, detailedChallengesResult] = await Promise.all([
+  const [membersResult, challengesResult] = await Promise.all([
     getLeagueMembers(league.id),
-    getUserPendingChallenges(session.user.id, league.id),
     getDetailedChallenges(session.user.id, league.id)
   ]);
 
@@ -61,13 +60,8 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
     return <div>Error loading challenges</div>;
   }
 
-  if (detailedChallengesResult.error) {
-    return <div>Error loading detailed challenges</div>;
-  }
-
   const { members } = membersResult;
   const { challenges } = challengesResult;
-  const { challenges: detailedChallenges } = detailedChallengesResult;
 
   // Check if league has started
   const hasLeagueStarted = () => {
@@ -118,7 +112,7 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
               <TabsContent value="challenges" className="mt-2">
                 <Suspense fallback={<ChallengesSkeleton />}>
                   <ChallengesContent 
-                    challenges={detailedChallenges || []}
+                    challenges={challenges || []}
                     currentUserId={session.user.id}
                     currentUserRank={membershipData.rank}
                   />

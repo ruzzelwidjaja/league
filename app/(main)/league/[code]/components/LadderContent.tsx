@@ -44,6 +44,25 @@ interface Challenge {
   challengerId: string | null;
   challengedId: string | null;
   status: string | null;
+  createdAt: string | null;
+  proposedSlots: Json | null;
+  selectedSlot: Json | null;
+  challenger?: {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    image: string | null;
+    organizationName: string | null;
+  } | null;
+  challenged?: {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    image: string | null;
+    organizationName: string | null;
+  } | null;
+  challengerRank?: number;
+  challengedRank?: number;
 }
 
 interface LadderContentProps {

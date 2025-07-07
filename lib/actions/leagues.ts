@@ -331,37 +331,7 @@ export async function getLeagueMembers(leagueId: string): Promise<{
   }
 }
 
-export async function getUserPendingChallenges(userId: string, leagueId: string): Promise<{
-  challenges: Array<{
-    id: string;
-    challengerId: string | null;
-    challengedId: string | null;
-    status: string | null;
-  }>;
-  error?: string;
-}> {
-  try {
-    const supabase = await createClient();
 
-    const { data: challenges, error } = await supabase
-      .from('challenges')
-      .select('id, challengerId, challengedId, status')
-      .eq('leagueId', leagueId)
-      .or(`challengerId.eq.${userId},challengedId.eq.${userId}`)
-      .in('status', ['pending', 'accepted'])
-      .order('createdAt', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching pending challenges:', error);
-      return { challenges: [], error: 'Failed to fetch challenges' };
-    }
-
-    return { challenges: challenges || [] };
-  } catch (error) {
-    console.error('Error getting pending challenges:', error);
-    return { challenges: [], error: 'Internal server error' };
-  }
-}
 
 export async function getDetailedChallenges(userId: string, leagueId: string): Promise<{
   challenges: Array<{
