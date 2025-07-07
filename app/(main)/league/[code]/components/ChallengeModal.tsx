@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Clock, ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { sendChallenge } from "@/lib/actions/challenges";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import type { Json } from "@/lib/supabase/database.types";
 
 interface ChallengeModalProps {
@@ -125,6 +126,8 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
     message: undefined
   });
 
+  const router = useRouter();
+
   const sharedAvailabilityCount = getSharedAvailabilityCount(currentUserAvailability, challengedUser.availability);
   
   const times = [
@@ -137,8 +140,9 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
     if (state.success && state.message) {
       toast.success(state.message);
       onClose();
+      router.refresh();
     }
-  }, [state.success, state.message, onClose]);
+  }, [state.success, state.message, onClose, router]);
 
   // Calculate rank changes
   const getRankPrediction = () => {
@@ -250,16 +254,16 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
   };
 
   return (
-    <div className="p-6 pt-4 max-w-2xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <Avatar className="size-12">
+    <div className="p-6 pt-2 max-w-2xl mx-auto">
+      <div className="flex items-center gap-3 mb-5">
+        <Avatar className="size-9">
           <AvatarImage src={challengedUser.image || undefined} alt={`${challengedUser.firstName} ${challengedUser.lastName}`} />
           <AvatarFallback className="text-sm font-medium bg-primary text-primary-foreground">
             {getInitials(challengedUser.firstName, challengedUser.lastName)}
           </AvatarFallback>
         </Avatar>
         <div>
-          <h3 className="font-semibold text-lg">
+          <h3 className="font-semibold text-md">
             {challengedUser.firstName} {challengedUser.lastName}
           </h3>
           <p className="text-sm text-muted-foreground">Rank #{challengedUser.rank}</p>
@@ -267,7 +271,7 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
       </div>
 
       {/* Rank Changes Badge Section */}
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-7">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-green-50 border border-green-200 text-green-700">
             <span className="text-sm font-medium">🏆</span>
@@ -281,7 +285,7 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
       </div>
 
       {/* Shared Availability Info */}
-      <div className="mb-8">
+      <div className="mb-7">
         <div className="flex items-center gap-2 mb-2">
           <Clock className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium">Shared Availability</span>
@@ -298,7 +302,7 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
 
 
       {/* Time Slot Selection */}
-      <div className="mb-8">
+      <div className="mb-7">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <CalendarDays className="w-4 h-4 text-muted-foreground" />
@@ -422,7 +426,7 @@ export function ChallengeModal({ children, challengedUser, currentUserAvailabili
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={setOpen} shouldScaleBackground>
+      <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
           {children}
         </DrawerTrigger>

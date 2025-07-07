@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Clock } from "lucide-react";
 import type { Json } from "@/lib/supabase/database.types";
-import { ChallengeModal } from "@/components/ChallengeModal";
+import { ChallengeModal } from "./ChallengeModal";
 
 interface User {
   id: string;
@@ -39,15 +39,23 @@ interface Member {
   user: User | null;
 }
 
+interface Challenge {
+  id: string;
+  challengerId: string | null;
+  challengedId: string | null;
+  status: string | null;
+}
+
 interface LadderContentProps {
   members: Member[];
   currentUserId: string;
   currentUserAvailability: Json | null;
   currentUserRank: number;
   leagueId: string;
+  pendingChallenges: Challenge[];
 }
 
-export function LadderContent({ members, currentUserId, currentUserAvailability, currentUserRank, leagueId }: LadderContentProps) {
+export function LadderContent({ members, currentUserId, currentUserAvailability, currentUserRank, leagueId, pendingChallenges }: LadderContentProps) {
   const getInitials = (firstName?: string | null, lastName?: string | null) => {
     if (firstName && lastName) {
       return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -71,6 +79,30 @@ export function LadderContent({ members, currentUserId, currentUserAvailability,
     
     return false;
   };
+
+  // Get challenge status with another user
+  const getChallengeStatus = (otherUserId: string) => {
+    const challenge = pendingChallenges.find(c => 
+      (c.challengerId === currentUserId && c.challengedId === otherUserId) ||
+      (c.challengerId === otherUserId && c.challengedId === currentUserId)
+    );
+    
+    if (!challenge) return null;
+    
+    // Return more specific status based on who initiated the challenge
+    if (challenge.challengerId === currentUserId) {
+      return challenge.status === 'pending' ? 'sent' : challenge.status;
+    } else {
+      return challenge.status === 'pending' ? 'received' : challenge.status;
+    }
+  };
+
+  // Count pending challenges sent by current user
+  const pendingChallengesSent = pendingChallenges.filter(c => 
+    c.challengerId === currentUserId && c.status === 'pending'
+  ).length;
+  
+  const hasReachedChallengeLimit = pendingChallengesSent >= 3;
 
   // Check if two players have similar availability
   const hasSimilarAvailability = (userAvailability: Json | null, otherAvailability: Json | null) => {
@@ -162,36 +194,78 @@ export function LadderContent({ members, currentUserId, currentUserAvailability,
                 <div className="bg-primary text-primary-foreground px-2 py-0.5 mr-2 rounded-md text-xs font-medium">
                   You
                 </div>
-              ) : (
-                canChallenge(member.rank) ? (
-                  <ChallengeModal
-                    challengedUser={{
-                      id: member.userId || '',
-                      firstName: member.user?.firstName || null,
-                      lastName: member.user?.lastName || null,
-                      image: member.user?.image || null,
-                      rank: member.rank,
-                      availability: member.availability
-                    }}
-                    currentUserAvailability={currentUserAvailability}
-                    currentUserRank={currentUserRank}
-                    leagueId={leagueId}
-                  >
-                    <Button 
-                      size="xs" 
-                      variant="outline"
-                      title="Challenge this player"
-                    >
-                      Challenge
-                    </Button>
-                  </ChallengeModal>
-                ) : (
-                  <div className="text-xs text-muted-foreground mr-2.5">
-                      Unavailable
-                  </div>
-                )
+              ) : (() => {
+                const challengeStatus = getChallengeStatus(member.userId || '');
                 
-              )}
+                if (challengeStatus) {
+                  // Show challenge status
+                  if (challengeStatus === 'sent') {
+                    return (
+                      <div className="text-xs text-amber-600 mr-2.5 font-medium">
+                        Pending
+                      </div>
+                    );
+                  } else if (challengeStatus === 'received') {
+                    return (
+                      <div className="text-xs text-blue-600 mr-2.5 font-medium">
+                        Respond
+                      </div>
+                    );
+                  } else if (challengeStatus === 'accepted') {
+                    return (
+                      <div className="text-xs text-green-600 mr-2.5 font-medium">
+                        Accepted
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="text-xs text-muted-foreground mr-2.5">
+                      {challengeStatus}
+                    </div>
+                  );
+                } else if (canChallenge(member.rank)) {
+                  // Check if user has reached challenge limit
+                  if (hasReachedChallengeLimit) {
+                    return (
+                      <div className="text-xs text-muted-foreground mr-2.5">
+                        Max challenges
+                      </div>
+                    );
+                  }
+                  
+                  // Show challenge button
+                  return (
+                    <ChallengeModal
+                      challengedUser={{
+                        id: member.userId || '',
+                        firstName: member.user?.firstName || null,
+                        lastName: member.user?.lastName || null,
+                        image: member.user?.image || null,
+                        rank: member.rank,
+                        availability: member.availability
+                      }}
+                      currentUserAvailability={currentUserAvailability}
+                      currentUserRank={currentUserRank}
+                      leagueId={leagueId}
+                    >
+                      <Button 
+                        size="xs" 
+                        variant="outline"
+                        title="Challenge this player"
+                      >
+                        Challenge
+                      </Button>
+                    </ChallengeModal>
+                  );
+                } else {
+                  // Show unavailable
+                  return (
+                    <div className="text-xs text-muted-foreground mr-2.5">
+                      Unavailable
+                    </div>
+                  );
+                }
+              })()}
             </div>
             </div>
             

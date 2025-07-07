@@ -3,7 +3,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
-import { revalidatePath } from 'next/cache'
 import { createChallengeSchema } from '@/lib/validations/challenges'
 
 interface ChallengeState {
@@ -206,9 +205,10 @@ export async function sendChallenge(
       // Don't fail the challenge creation for logging errors
     }
 
-    // 12. Revalidate relevant pages
-    revalidatePath('/league/[code]', 'page');
-    revalidatePath('/challenges');
+    // 12. Don't revalidate immediately - let the client handle UI updates
+    // The modal needs to close gracefully first
+    // revalidatePath('/league/[code]', 'page');
+    // revalidatePath('/challenges');
 
     return { 
       success: true, 

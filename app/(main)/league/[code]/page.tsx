@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import UserDropdown from "./components/UserDropdown";
 import { headers } from "next/headers";
-import { getLeagueByCode, getUserMembershipData, getLeagueMembers } from "@/lib/actions/leagues";
+import { getLeagueByCode, getUserMembershipData, getLeagueMembers, getUserPendingChallenges } from "@/lib/actions/leagues";
 import { LeaguePreStart } from "./components/LeaguePreStart";
 import { PlayerRankCard } from "@/components/PlayerRankCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -45,11 +45,22 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
     redirect(`/join/${code}`);
   }
 
-  // Get all members with user details
-  const { members, error: membersError } = await getLeagueMembers(league.id);
-  if (membersError) {
+  // Get all members with user details and pending challenges
+  const [membersResult, challengesResult] = await Promise.all([
+    getLeagueMembers(league.id),
+    getUserPendingChallenges(session.user.id, league.id)
+  ]);
+
+  if (membersResult.error) {
     return <div>Error loading members</div>;
   }
+
+  if (challengesResult.error) {
+    return <div>Error loading challenges</div>;
+  }
+
+  const { members } = membersResult;
+  const { challenges } = challengesResult;
 
   // Check if league has started
   const hasLeagueStarted = () => {
@@ -73,6 +84,8 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
             <PlayerRankCard 
               currentRank={membershipData.rank}
               previousRank={membershipData.previousRank}
+              pendingChallenges={challenges || []}
+              currentUserId={session.user.id}
             />
             
             <Tabs defaultValue="ladder" className="w-full">
@@ -90,6 +103,7 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
                     currentUserAvailability={membershipData.availability || null}
                     currentUserRank={membershipData.rank}
                     leagueId={league.id}
+                    pendingChallenges={challenges || []}
                   />
                 </Suspense>
               </TabsContent>

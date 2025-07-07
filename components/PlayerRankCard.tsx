@@ -2,12 +2,21 @@ import React from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { InfoBox } from '@/components/ui/info-box';
 
+interface Challenge {
+  id: string;
+  challengerId: string | null;
+  challengedId: string | null;
+  status: string | null;
+}
+
 interface PlayerRankCardProps {
   currentRank: number;
   previousRank?: number;
+  pendingChallenges?: Challenge[];
+  currentUserId?: string;
 }
 
-export function PlayerRankCard({ currentRank, previousRank }: PlayerRankCardProps) {
+export function PlayerRankCard({ currentRank, previousRank, pendingChallenges = [], currentUserId }: PlayerRankCardProps) {
   // Calculate if rank went up or down
   const getRankChange = () => {
     if (!previousRank) return null;
@@ -20,6 +29,11 @@ export function PlayerRankCard({ currentRank, previousRank }: PlayerRankCardProp
 
   const rankChange = getRankChange();
   const rankDifference = previousRank ? Math.abs(currentRank - previousRank) : 0;
+
+  // Calculate pending challenges sent by current user
+  const pendingChallengesSent = currentUserId ? pendingChallenges.filter(c => 
+    c.challengerId === currentUserId && c.status === 'pending'
+  ).length : 0;
 
   return (
     <InfoBox variant="transparent">
@@ -44,8 +58,13 @@ export function PlayerRankCard({ currentRank, previousRank }: PlayerRankCardProp
             )}
           </div>
         </div>
-        <div className="flex-1">
-          {/* Right side empty for now as requested */}
+        <div className="flex-1 text-right">
+          {currentUserId && (
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Challenges sent</p>
+              <span className="text-2xl font-bold text-gray-900">{pendingChallengesSent}/3</span>
+            </div>
+          )}
         </div>
       </div>
     </InfoBox>
