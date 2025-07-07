@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import type { Json } from "@/lib/supabase/database.types";
+import { RespondToChallengeModal } from "./RespondToChallengeModal";
 
 interface User {
   id: string;
@@ -54,7 +55,32 @@ export function ChallengesContent({ challenges, currentUserId, currentUserRank }
       const slot = selectedSlot as { day?: string; slot?: string; date?: string };
       if (slot.day && slot.slot) {
         const timeLabel = slot.slot === 'lunch' ? '12-1pm' : '5-7pm';
-        return `${slot.day}, ${timeLabel}`;
+        
+        // Check if it's today
+        const today = new Date();
+        const slotDate = slot.date ? new Date(slot.date) : null;
+        const isToday = slotDate && 
+          today.getFullYear() === slotDate.getFullYear() &&
+          today.getMonth() === slotDate.getMonth() &&
+          today.getDate() === slotDate.getDate();
+        
+        if (isToday) {
+          return `Today, ${timeLabel}`;
+        }
+        
+        // Map short day names to full names
+        const dayMap: { [key: string]: string } = {
+          'Mon': 'Monday',
+          'Tue': 'Tuesday',
+          'Wed': 'Wednesday', 
+          'Thu': 'Thursday',
+          'Fri': 'Friday',
+          'Sat': 'Saturday',
+          'Sun': 'Sunday'
+        };
+        
+        const fullDayName = dayMap[slot.day] || slot.day;
+        return `${fullDayName}, ${timeLabel}`;
       }
     }
     return "Time TBD";
@@ -93,50 +119,49 @@ export function ChallengesContent({ challenges, currentUserId, currentUserRank }
     
     return (
       <div className="p-4 border border-gray-200 rounded-lg bg-transparent">
-        <div className="flex items-center gap-3">
-          {/* Rank Direction Indicator - Rounded Box */}
-          <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${
-            isOpponentHigher 
-              ? 'bg-green-100 border border-green-200' 
-              : 'bg-red-100 border border-red-200'
-          }`}>
-            {isOpponentHigher ? (
-              <ChevronUp className="w-4 h-4 text-green-600" />
-            ) : (
-              <ChevronDown className="w-4 h-4 text-red-600" />
-            )}
-          </div>
+        <div className="flex items-center justify-between">
+          {/* Left Side: Rank Direction & Player Info */}
+          <div className="flex items-center gap-3">
+            {/* Rank Direction Indicator - Rounded Box */}
+            <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${
+              isOpponentHigher 
+                ? 'bg-green-100 border border-green-200' 
+                : 'bg-red-100 border border-red-200'
+            }`}>
+              {isOpponentHigher ? (
+                <ChevronUp className="w-4 h-4 text-green-600" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-red-600" />
+              )}
+            </div>
 
-          {/* Player Info */}
-          <div className="flex flex-col">
-            <p className="font-medium text-sm text-gray-900">
-              {opponent?.firstName} {opponent?.lastName}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Rank #{opponentRank || '?'}
-            </p>
-          </div>
-
-          {/* Time Slot Info */}
-          <div className="flex-1 min-w-0">
-            {type === 'active' && (
-              <p className="text-xs text-muted-foreground">
-                {formatSelectedTimeSlot(challenge.selectedSlot)}
+            {/* Player Info */}
+            <div className="flex flex-col">
+              <p className="font-medium text-sm text-gray-900">
+                {opponent?.firstName} {opponent?.lastName}
               </p>
-            )}
-            {type === 'active' && challenge.createdAt && (
               <p className="text-xs text-muted-foreground">
-                {getDaysRemaining(challenge.createdAt)} days left
+                Rank #{opponentRank || '?'}
               </p>
-            )}
+            </div>
           </div>
 
           {/* Right Side Actions/Status */}
           <div className="flex items-center gap-1">
             {type === 'active' && (
-              <Button size="xs" variant="outline">
-                Submit Result
-              </Button>
+              <div className="flex flex-col items-end gap-1">
+                <p className="text-xs text-muted-foreground">
+                  {formatSelectedTimeSlot(challenge.selectedSlot)}
+                </p>
+                {challenge.createdAt && (
+                  <p className="text-xs text-muted-foreground">
+                    {getDaysRemaining(challenge.createdAt)} days left
+                  </p>
+                )}
+                <Button size="xs" variant="outline">
+                  Submit Result
+                </Button>
+              </div>
             )}
             
             {type === 'incoming' && (
@@ -146,9 +171,14 @@ export function ChallengesContent({ challenges, currentUserId, currentUserRank }
                     {getDaysRemaining(challenge.createdAt)} days left
                   </p>
                 )}
-                <Button size="xs" variant="outline">
-                  View Challenge
-                </Button>
+                <RespondToChallengeModal
+                  challenge={challenge}
+                  currentUserRank={currentUserRank}
+                >
+                  <Button size="xs" variant="outline">
+                    View Challenge
+                  </Button>
+                </RespondToChallengeModal>
               </div>
             )}
             

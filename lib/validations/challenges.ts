@@ -32,6 +32,12 @@ export const createChallengeSchema = z.object({
     .max(10, 'Maximum 10 time slots allowed')
 })
 
+// Challenge acceptance schema
+export const acceptChallengeSchema = z.object({
+  challengeId: z.string().min(1, 'Challenge ID is required'),
+  selectedSlot: timeSlotSchema
+})
 
 export type CreateChallengeInput = z.infer<typeof createChallengeSchema>
+export type AcceptChallengeInput = z.infer<typeof acceptChallengeSchema>
 export type TimeSlot = z.infer<typeof timeSlotSchema>

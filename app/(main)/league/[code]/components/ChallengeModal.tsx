@@ -182,8 +182,19 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
 
   const weekDates = getWeekDates();
   const today = new Date();
+  
+  // Allow selection from today until the next Monday (inclusive)
   const maxDate = new Date(today);
-  maxDate.setDate(today.getDate() + 5);
+  const todayDayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+  
+  if (todayDayOfWeek === 1) { // If today is Monday
+    // Can select until Friday of this week
+    maxDate.setDate(today.getDate() + (5 - 1)); // Friday is 4 days after Monday
+  } else {
+    // Can select until Monday of next week
+    const daysUntilNextMonday = (8 - todayDayOfWeek) % 7;
+    maxDate.setDate(today.getDate() + daysUntilNextMonday);
+  }
 
   const isDateSelectable = (date: Date) => {
     const dateInfo = getDateInfo(date);
@@ -279,7 +290,7 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-red-50 border border-red-200 text-red-700">
             <span className="text-sm font-medium">😞</span>
-            <span className="text-sm font-medium"> #{currentUserRank} → #{rankPrediction.lose}</span>
+            <span className="text-sm font-medium"> #{currentUserRank} → #{rankPrediction.lose}</span> 
           </div>
         </div>
       </div>
@@ -367,7 +378,7 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
                         ? isShared
                           ? "border-green-300 bg-green-50 hover:border-green-400 hover:bg-green-100"
                           : "border-border hover:border-primary/50 hover:bg-primary/5"
-                        : "border-border bg-muted text-muted-foreground cursor-not-allowed"
+                        : "border-border bg-border text-muted-foreground cursor-not-allowed"
                     }`}
                   />
                 );
@@ -383,7 +394,7 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
               <span>Shared availability</span>
             </div>
           )}
-          <div>Selected {selectedSlots.length} time slots • You can select up to 5 days ahead</div>
+          <div>Selected {selectedSlots.length} time slots • You can select up to 1 week ahead</div>
         </div>
       </div>
 
