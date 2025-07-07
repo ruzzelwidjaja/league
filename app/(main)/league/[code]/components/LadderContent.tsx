@@ -90,11 +90,11 @@ export function LadderContent({ members, currentUserId, currentUserAvailability,
   
   // Check if a player can be challenged
   const canChallenge = (targetRank: number) => {
-    // Can challenge players above you (lower rank number)
-    if (targetRank < currentUserRank) return true;
+    // Can challenge players up to 3 ranks above you (lower rank number)
+    if (targetRank < currentUserRank && targetRank >= currentUserRank - 3) return true;
     
-    // Can challenge players within 3 ranks below you
-    if (targetRank > currentUserRank && targetRank <= currentUserRank + 3) return true;
+    // Can challenge any player below you (higher rank number)
+    if (targetRank > currentUserRank) return true;
     
     return false;
   };
@@ -122,6 +122,13 @@ export function LadderContent({ members, currentUserId, currentUserAvailability,
   ).length;
   
   const hasReachedChallengeLimit = pendingChallengesSent >= 3;
+
+  // Count incoming challenges for a specific user
+  const getIncomingChallengeCount = (userId: string) => {
+    return pendingChallenges.filter(c => 
+      c.challengedId === userId && c.status === 'pending'
+    ).length;
+  };
 
   // Check if two players have similar availability
   const hasSimilarAvailability = (userAvailability: Json | null, otherAvailability: Json | null) => {
@@ -248,6 +255,16 @@ export function LadderContent({ members, currentUserId, currentUserAvailability,
                     return (
                       <div className="text-xs text-muted-foreground mr-2.5">
                         Max challenges
+                      </div>
+                    );
+                  }
+                  
+                  // Check if target player has too many incoming challenges
+                  const targetIncomingCount = getIncomingChallengeCount(member.userId || '');
+                  if (targetIncomingCount >= 3) {
+                    return (
+                      <div className="text-xs text-muted-foreground mr-2.5">
+                        Player busy
                       </div>
                     );
                   }

@@ -119,13 +119,13 @@ export async function sendChallenge(
     }
 
     // 7. Validate rank-based challenge rules
-    const canChallengeUp = challenged.rank < challenger.rank; // Challenge someone above
-    const canChallengeDown = challenged.rank > challenger.rank && challenged.rank <= challenger.rank + 3; // Challenge up to 3 below
+    const canChallengeUp = challenged.rank < challenger.rank && challenged.rank >= challenger.rank - 3; // Challenge up to 3 above
+    const canChallengeDown = challenged.rank > challenger.rank; // Challenge anyone below
 
     if (!canChallengeUp && !canChallengeDown) {
       return { 
         success: false, 
-        error: `You can only challenge players above you or up to 3 ranks below you. This player is rank ${challenged.rank}.`
+        error: `You can only challenge players up to 3 ranks above you or any player below you. This player is rank ${challenged.rank}.`
       };
     }
 
@@ -161,7 +161,22 @@ export async function sendChallenge(
       };
     }
 
-    // 10. Create the challenge
+    // 10. Check challenged player incoming challenge limit
+    const { data: challengedIncomingChallenges } = await supabase
+      .from('challenges')
+      .select('id')
+      .eq('challengedId', challengedId)
+      .eq('leagueId', leagueId)
+      .eq('status', 'pending');
+
+    if (challengedIncomingChallenges && challengedIncomingChallenges.length >= maxPendingChallenges) {
+      return { 
+        success: false, 
+        error: `This player is currently busy with ${maxPendingChallenges} pending challenges. Please try again later.` 
+      };
+    }
+
+    // 11. Create the challenge
     const { data: challenge, error: challengeError } = await supabase
       .from('challenges')
       .insert({
@@ -183,7 +198,7 @@ export async function sendChallenge(
       };
     }
 
-    // 11. Create activity log
+    // 12. Create activity log
     const { error: logError } = await supabase
       .from('activity_logs')
       .insert({
@@ -205,7 +220,7 @@ export async function sendChallenge(
       // Don't fail the challenge creation for logging errors
     }
 
-    // 12. Don't revalidate immediately - let the client handle UI updates
+    // 13. Don't revalidate immediately - let the client handle UI updates
     // The modal needs to close gracefully first
     // revalidatePath('/league/[code]', 'page');
     // revalidatePath('/challenges');

@@ -140,9 +140,16 @@ export function ChallengesContent({ challenges, currentUserId, currentUserRank }
             )}
             
             {type === 'incoming' && (
-              <Button size="xs" variant="outline">
-                View Challenge
-              </Button>
+              <div className="flex flex-col items-end gap-1">
+                {challenge.createdAt && (
+                  <p className="text-xs text-muted-foreground">
+                    {getDaysRemaining(challenge.createdAt)} days left
+                  </p>
+                )}
+                <Button size="xs" variant="outline">
+                  View Challenge
+                </Button>
+              </div>
             )}
             
             {type === 'outgoing' && (
