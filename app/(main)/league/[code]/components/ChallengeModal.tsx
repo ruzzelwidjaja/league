@@ -10,6 +10,7 @@ import { sendChallenge } from "@/lib/actions/challenges";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import type { Json } from "@/lib/supabase/database.types";
+import { addDays, startOfDay, getDay } from "date-fns";
 
 interface ChallengeModalProps {
   children: React.ReactNode;
@@ -167,65 +168,70 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
 
   // Get the dates for the current week view
   const getWeekDates = () => {
-    const today = new Date();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (currentWeekOffset * 7)); // Start on Monday
+    const today = startOfDay(new Date());
+    
+    // Calculate start of week (Monday) for the current offset
+    const startOfWeek = addDays(today, -getDay(today) + 1 + (currentWeekOffset * 7));
     
     const dates = [];
     for (let i = 0; i < 5; i++) { // Monday to Friday
-      const date = new Date(startOfWeek);
-      date.setDate(startOfWeek.getDate() + i);
+      const date = addDays(startOfWeek, i);
       dates.push(date);
     }
     return dates;
   };
 
   const weekDates = getWeekDates();
-  const today = new Date();
   
-  // Allow selection from today until the next Monday (inclusive)
-  const maxDate = new Date(today);
-  const todayDayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+  // Use local timezone - create date at start of day in local time
+  const today = startOfDay(new Date()); // This creates today at midnight in local timezone
   
-  if (todayDayOfWeek === 1) { // If today is Monday
-    // Can select until Friday of this week
-    maxDate.setDate(today.getDate() + (5 - 1)); // Friday is 4 days after Monday
-  } else {
-    // Can select until Monday of next week
-    const daysUntilNextMonday = (8 - todayDayOfWeek) % 7;
-    maxDate.setDate(today.getDate() + daysUntilNextMonday);
-  }
+  // Allow selection from today up to 1 week ahead (6 days ahead, so 7 days total including today)
+  const maxDate = addDays(today, 6);
 
   const isDateSelectable = (date: Date) => {
-    const dateInfo = getDateInfo(date);
-    return dateInfo.isWeekday && date >= today && date <= maxDate;
+    // Normalize the input date to start of day for consistent comparison
+    const normalizedDate = startOfDay(date);
+    
+    const dateInfo = getDateInfo(normalizedDate);
+    const isAfterOrSameAsToday = normalizedDate >= today;
+    const isBeforeOrSameAsMaxDate = normalizedDate <= maxDate;
+    const result = dateInfo.isWeekday && isAfterOrSameAsToday && isBeforeOrSameAsMaxDate;
+    
+    return result;
   };
 
   // Check if a week has any available slots
   const hasAvailableSlots = (weekOffset: number) => {
-    const testToday = new Date();
-    const testStartOfWeek = new Date(testToday);
-    testStartOfWeek.setDate(testToday.getDate() - testToday.getDay() + 1 + (weekOffset * 7));
+    const testToday = startOfDay(new Date());
     
+    // Calculate start of week (Monday) for the given offset
+    const testStartOfWeek = addDays(testToday, -getDay(testToday) + 1 + (weekOffset * 7));
+    
+    let hasAnySelectable = false;
     for (let i = 0; i < 5; i++) {
-      const date = new Date(testStartOfWeek);
-      date.setDate(testStartOfWeek.getDate() + i);
-      if (isDateSelectable(date)) {
-        return true;
+      const date = addDays(testStartOfWeek, i);
+      const selectable = isDateSelectable(date);
+      if (selectable) {
+        hasAnySelectable = true;
       }
     }
-    return false;
+    
+    return hasAnySelectable;
   };
 
   const toggleSlot = (date: Date, timeSlot: string) => {
-    if (!isDateSelectable(date)) return;
+    // Normalize date to start of day for consistent comparison
+    const normalizedDate = startOfDay(date);
+    
+    if (!isDateSelectable(normalizedDate)) return;
 
-    const dateInfo = getDateInfo(date);
-    const slotId = `${date.toISOString().split('T')[0]}-${timeSlot}`;
+    const dateInfo = getDateInfo(normalizedDate);
+    const slotId = `${normalizedDate.toISOString().split('T')[0]}-${timeSlot}`;
     
     const newSlot: TimeSlot = {
       id: slotId,
-      date: date.toISOString().split('T')[0],
+      date: normalizedDate.toISOString().split('T')[0],
       day: dateInfo.dayLabel,
       slot: timeSlot
     };
@@ -241,7 +247,10 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
   };
 
   const isSlotSelected = (date: Date, timeSlot: string) => {
-    const slotId = `${date.toISOString().split('T')[0]}-${timeSlot}`;
+    // Normalize date to start of day for consistent comparison
+    const normalizedDate = startOfDay(date);
+    
+    const slotId = `${normalizedDate.toISOString().split('T')[0]}-${timeSlot}`;
     return selectedSlots.some(s => s.id === slotId);
   };
 
@@ -256,9 +265,6 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
   };
 
   const handleSubmit = (formData: FormData) => {
-    console.log('formData-->', formData)
-    console.log('selectedSlots-->', selectedSlots)
-    console.log('--------------------------------')
     // Add the selected slots to form data
     formData.append('challengedId', challengedUser.id);
     formData.append('leagueId', leagueId);
@@ -268,7 +274,7 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
   };
 
   return (
-    <div className="p-6 pt-2 max-w-2xl mx-auto overflow-y-auto">
+    <div className="p-6 pt-2 mx-auto w-full overflow-y-auto">
       <div className="flex items-center gap-3 mb-5">
         <Avatar className="size-9">
           <AvatarImage src={challengedUser.image || undefined} alt={`${challengedUser.firstName} ${challengedUser.lastName}`} />
