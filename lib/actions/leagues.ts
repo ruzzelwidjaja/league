@@ -348,6 +348,7 @@ export async function getDetailedChallenges(userId: string, leagueId: string): P
       lastName: string | null;
       image: string | null;
       organizationName: string | null;
+      phoneNumber: string | null;
     } | null;
     challenged?: {
       id: string;
@@ -355,6 +356,7 @@ export async function getDetailedChallenges(userId: string, leagueId: string): P
       lastName: string | null;
       image: string | null;
       organizationName: string | null;
+      phoneNumber: string | null;
     } | null;
     challengerRank?: number;
     challengedRank?: number;
@@ -387,7 +389,7 @@ export async function getDetailedChallenges(userId: string, leagueId: string): P
         const [userResult, memberResult] = await Promise.all([
           supabase
             .from('user')
-            .select('id, firstName, lastName, image, organizationName')
+            .select('id, firstName, lastName, image, organizationName, phoneNumber')
             .eq('id', challenge.challengerId)
             .single(),
           supabase
@@ -407,7 +409,7 @@ export async function getDetailedChallenges(userId: string, leagueId: string): P
         const [userResult, memberResult] = await Promise.all([
           supabase
             .from('user')
-            .select('id, firstName, lastName, image, organizationName')
+            .select('id, firstName, lastName, image, organizationName, phoneNumber')
             .eq('id', challenge.challengedId)
             .single(),
           supabase

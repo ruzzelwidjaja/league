@@ -71,3 +71,27 @@ export const formatChallengeSlot = (slotData: { date?: string; slot?: string }) 
     return `${format(date, 'MMM d, yyyy')}, ${time}`; // "Jan 15, 2025, 12-1pm"
   }
 };
+
+/**
+ * Creates a WhatsApp link to accept a ping pong league match for a specific time slot
+ * @param phoneNumber - Phone number in international format (e.g., "+353833190717")
+ * @param timeSlot - Formatted time slot (e.g., "Tomorrow, 12-1pm")
+ * @param yourName - Your name to include in the message
+ * @returns WhatsApp link with acceptance message
+ */
+export const acceptChallengeWhatsApp = (
+  phoneNumber: string, 
+  timeSlot: string,
+  yourName: string
+): string => {
+  // Clean phone number - remove spaces, dashes, and + sign
+  const cleanPhone = phoneNumber.replace(/[\s\-+]/g, '');
+  
+  const message = `Hey I'm ${yourName}, up for a ping pong league match ${timeSlot}? 🏓`;
+  
+  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+};
+
+export function capitalizeFirstLetter(val: string) {
+  return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+}

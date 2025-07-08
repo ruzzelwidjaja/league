@@ -115,6 +115,7 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
                     challenges={challenges || []}
                     currentUserId={session.user.id}
                     currentUserRank={membershipData.rank}
+                    currentUserFirstName={session.user.firstName || ''}
                   />
                 </Suspense>
               </TabsContent>

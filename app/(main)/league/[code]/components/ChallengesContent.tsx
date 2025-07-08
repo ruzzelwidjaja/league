@@ -1,10 +1,11 @@
+'use client'
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, MessageCircle } from "lucide-react";
 import type { Json } from "@/lib/supabase/database.types";
 import { RespondToChallengeModal } from "./RespondToChallengeModal";
-import { formatChallengeSlot } from "@/lib/utils";
+import { formatChallengeSlot, acceptChallengeWhatsApp, capitalizeFirstLetter } from "@/lib/utils";
 
 interface User {
   id: string;
@@ -12,6 +13,7 @@ interface User {
   lastName?: string | null;
   image?: string | null;
   organizationName?: string | null;
+  phoneNumber?: string | null;
 }
 
 interface Challenge {
@@ -32,6 +34,7 @@ interface ChallengesContentProps {
   challenges: Challenge[];
   currentUserId: string;
   currentUserRank: number;
+  currentUserFirstName: string;
 }
 
 interface ChallengeCardProps {
@@ -39,7 +42,7 @@ interface ChallengeCardProps {
   type: 'active' | 'incoming' | 'outgoing' | 'rejected';
 }
 
-export function ChallengesContent({ challenges, currentUserId, currentUserRank }: ChallengesContentProps) {
+export function ChallengesContent({ challenges, currentUserId, currentUserRank, currentUserFirstName }: ChallengesContentProps) {
   // Calculate days remaining until auto-cancellation (5 working days = ~7 calendar days)
   const getDaysRemaining = (createdAt: string) => {
     const created = new Date(createdAt);
@@ -131,9 +134,25 @@ export function ChallengesContent({ challenges, currentUserId, currentUserRank }
                     {getDaysRemaining(challenge.createdAt)} days left
                   </p>
                 )}
-                <Button size="xs" variant="outline">
-                  Submit Result
-                </Button>
+                <div className="flex items-center gap-1">
+                  {opponent?.phoneNumber && (
+                    <Button 
+                      size="xs" 
+                      variant="outline"
+                      onClick={() => {
+                        if (!opponent?.phoneNumber) return;
+                        const timeSlot = formatSelectedTimeSlot(challenge.selectedSlot);
+                        const whatsappUrl = acceptChallengeWhatsApp(opponent?.phoneNumber, timeSlot, capitalizeFirstLetter(currentUserFirstName));
+                        window.open(whatsappUrl, '_blank');
+                      }}
+                    >
+                      <MessageCircle className="w-3 h-3" />
+                    </Button>
+                  )}
+                  <Button size="xs" variant="outline">
+                    Submit Result
+                  </Button>
+                </div>
               </div>
             )}
             
