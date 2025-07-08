@@ -256,6 +256,9 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
   };
 
   const handleSubmit = (formData: FormData) => {
+    console.log('formData-->', formData)
+    console.log('selectedSlots-->', selectedSlots)
+    console.log('--------------------------------')
     // Add the selected slots to form data
     formData.append('challengedId', challengedUser.id);
     formData.append('leagueId', leagueId);

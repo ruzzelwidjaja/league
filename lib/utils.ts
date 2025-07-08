@@ -1,6 +1,73 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-
+import { 
+  isToday, 
+  isTomorrow, 
+  isYesterday, 
+  format, 
+  differenceInDays, 
+  startOfWeek, 
+  endOfWeek,
+  isSameWeek,
+  addWeeks
+} from 'date-fns';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const formatSlotTime = (slot: string) => {
+  const times: { [key: string]: string } = {
+    lunch: "12-1pm",
+    after_work: "5-7pm"
+  };
+  return times[slot] || slot;
+};
+
+export const formatChallengeSlot = (slotData: { date?: string; slot?: string }) => {
+  if (!slotData?.date || !slotData?.slot) return "Time TBD";
+  
+  // Parse as local date to avoid timezone issues
+  const date = new Date(slotData.date + 'T12:00:00');
+  const time = formatSlotTime(slotData.slot);
+  const now = new Date();
+  const daysDiff = differenceInDays(date, now);
+  
+  // Handle explicit cases first
+  if (isToday(date)) return `Today, ${time}`;
+  if (isTomorrow(date)) return `Tomorrow, ${time}`;
+  if (isYesterday(date)) return `Yesterday, ${time}`;
+  
+  // Current week (but not today/tomorrow/yesterday)
+  if (isSameWeek(date, now, { weekStartsOn: 1 })) { // Monday start
+    if (daysDiff > 0) {
+      return `${format(date, 'EEEE')}, ${time}`; // "Wednesday, 12-1pm"
+    } else {
+      return `Last ${format(date, 'EEEE')}, ${time}`; // "Last Monday, 12-1pm"
+    }
+  }
+  
+  // Next week
+  const nextWeekStart = startOfWeek(addWeeks(now, 1), { weekStartsOn: 1 });
+  const nextWeekEnd = endOfWeek(addWeeks(now, 1), { weekStartsOn: 1 });
+  
+  if (date >= nextWeekStart && date <= nextWeekEnd) {
+    return `Next ${format(date, 'EEEE')}, ${time}`; // "Next Friday, 5-7pm"
+  }
+  
+  // Last week
+  const lastWeekStart = startOfWeek(addWeeks(now, -1), { weekStartsOn: 1 });
+  const lastWeekEnd = endOfWeek(addWeeks(now, -1), { weekStartsOn: 1 });
+  
+  if (date >= lastWeekStart && date <= lastWeekEnd) {
+    return `Last ${format(date, 'EEEE')}, ${time}`; // "Last Friday, 5-7pm"
+  }
+  
+  // For dates beyond 1 week in either direction, use absolute format
+  const isThisYear = format(date, 'yyyy') === format(now, 'yyyy');
+  
+  if (isThisYear) {
+    return `${format(date, 'MMM d')}, ${time}`; // "Jan 15, 12-1pm"
+  } else {
+    return `${format(date, 'MMM d, yyyy')}, ${time}`; // "Jan 15, 2025, 12-1pm"
+  }
+};

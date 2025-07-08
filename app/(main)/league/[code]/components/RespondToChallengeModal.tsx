@@ -12,6 +12,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 import { toast } from 'sonner';
 import type { Json } from '@/lib/supabase/database.types';
+import { formatSlotTime, formatChallengeSlot } from '@/lib/utils';
 
 interface TimeSlot {
   id: string;
@@ -109,23 +110,6 @@ export function RespondToChallengeModal({ challenge, currentUserRank, children }
     return "U";
   };
 
-  const mapDayToFull = (day: string) => {
-    const dayMap: { [key: string]: string } = {
-      'Mon': 'Monday',
-      'Tue': 'Tuesday', 
-      'Wed': 'Wednesday',
-      'Thu': 'Thursday',
-      'Fri': 'Friday',
-      'Sat': 'Saturday',
-      'Sun': 'Sunday'
-    };
-    return dayMap[day] || day;
-  };
-
-  const formatTimeSlot = (slot: string) => {
-    return slot === 'lunch' ? '12-1pm' : '5-7pm';
-  };
-
   const handleSubmit = async (formData: FormData) => {
     if (!selectedSlot) {
       toast.error('Please select a time slot');
@@ -135,7 +119,7 @@ export function RespondToChallengeModal({ challenge, currentUserRank, children }
     formData.append('challengeId', challenge.id);
     formData.append('selectedSlot', JSON.stringify(selectedSlot));
     
-    await formAction(formData);
+    formAction(formData);
   };
 
   // Handle success
@@ -205,12 +189,9 @@ export function RespondToChallengeModal({ challenge, currentUserRank, children }
               }`}
             >
               <div className="flex justify-between items-center">
-                <div>
-                  <p className="font-medium text-sm">{mapDayToFull(slot.day)}</p>
-                  <p className="text-xs text-muted-foreground">{slot.date}</p>
-                </div>
+                <p className="font-medium text-sm">{formatChallengeSlot(slot)}</p>
                 <Badge variant="default" className="text-xs">
-                  {formatTimeSlot(slot.slot)}
+                  {formatSlotTime(slot.slot)}
                 </Badge>
               </div>
             </button>

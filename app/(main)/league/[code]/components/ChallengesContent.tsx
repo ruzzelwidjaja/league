@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import type { Json } from "@/lib/supabase/database.types";
 import { RespondToChallengeModal } from "./RespondToChallengeModal";
+import { formatChallengeSlot } from "@/lib/utils";
 
 interface User {
   id: string;
@@ -53,35 +54,7 @@ export function ChallengesContent({ challenges, currentUserId, currentUserRank }
   const formatSelectedTimeSlot = (selectedSlot: Json | null) => {
     if (selectedSlot && typeof selectedSlot === 'object') {
       const slot = selectedSlot as { day?: string; slot?: string; date?: string };
-      if (slot.day && slot.slot) {
-        const timeLabel = slot.slot === 'lunch' ? '12-1pm' : '5-7pm';
-        
-        // Check if it's today
-        const today = new Date();
-        const slotDate = slot.date ? new Date(slot.date) : null;
-        const isToday = slotDate && 
-          today.getFullYear() === slotDate.getFullYear() &&
-          today.getMonth() === slotDate.getMonth() &&
-          today.getDate() === slotDate.getDate();
-        
-        if (isToday) {
-          return `Today, ${timeLabel}`;
-        }
-        
-        // Map short day names to full names
-        const dayMap: { [key: string]: string } = {
-          'Mon': 'Monday',
-          'Tue': 'Tuesday',
-          'Wed': 'Wednesday', 
-          'Thu': 'Thursday',
-          'Fri': 'Friday',
-          'Sat': 'Saturday',
-          'Sun': 'Sunday'
-        };
-        
-        const fullDayName = dayMap[slot.day] || slot.day;
-        return `${fullDayName}, ${timeLabel}`;
-      }
+      return formatChallengeSlot(slot);
     }
     return "Time TBD";
   };
