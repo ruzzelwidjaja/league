@@ -1,22 +1,9 @@
 import React from "react";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { requireVerifiedAuth } from "@/lib/session-utils";
 import ProfileForm from "./ProfileForm";
-import { headers } from "next/headers";
 
 export default async function ProfilePage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/auth/signin");
-  }
-
-  // Check if email is verified
-  if (!session.user.emailVerified) {
-    redirect("/auth/signin?message=Please verify your email first");
-  }
+  const session = await requireVerifiedAuth();
 
   return (
     <main className="min-h-svh p-6">

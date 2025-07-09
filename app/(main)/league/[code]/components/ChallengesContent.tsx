@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown, MessageCircle } from "lucide-react";
 import type { Json } from "@/lib/supabase/database.types";
 import { RespondToChallengeModal } from "./RespondToChallengeModal";
-import { formatChallengeSlot, acceptChallengeWhatsApp, capitalizeFirstLetter } from "@/lib/utils";
+import { formatChallengeSlot, acceptChallengeWhatsApp, capitalizeFirstLetter, getNowInLocalTz } from "@/lib/utils";
 
 interface User {
   id: string;
@@ -46,7 +46,7 @@ export function ChallengesContent({ challenges, currentUserId, currentUserRank, 
   // Calculate days remaining until auto-cancellation (5 working days = ~7 calendar days)
   const getDaysRemaining = (createdAt: string) => {
     const created = new Date(createdAt);
-    const now = new Date();
+    const now = getNowInLocalTz();
     const diffTime = now.getTime() - created.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const remainingDays = 7 - diffDays;
@@ -75,7 +75,7 @@ export function ChallengesContent({ challenges, currentUserId, currentUserRank, 
   const recentRejections = outgoingChallenges.filter(c => {
     if (c.status !== 'rejected' || !c.createdAt) return false;
     const created = new Date(c.createdAt);
-    const weekAgo = new Date();
+    const weekAgo = getNowInLocalTz();
     weekAgo.setDate(weekAgo.getDate() - 7);
     return created >= weekAgo;
   });

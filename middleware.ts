@@ -3,6 +3,9 @@ import { getSessionCookie } from "better-auth/cookies";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  
+  // Edge Runtime compatible session check - only check for cookie presence
+  // Full session validation happens on the server in pages/API routes
   const sessionCookie = getSessionCookie(request);
   const isAuthenticated = !!sessionCookie;
 

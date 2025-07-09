@@ -6,6 +6,7 @@ import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import type { UserAvailability, League } from '@/lib/supabase/types'
 import type { Json } from '@/lib/supabase/database.types'
+import { getNowInLocalTzISO } from '@/lib/utils'
 
 export async function checkLeagueExists(code: string): Promise<boolean> {
   try {
@@ -152,7 +153,7 @@ export async function joinLeague(
           skillTier,
           status: 'active',
           availability: (availability || {}) as Json,
-          joinedAt: new Date().toISOString()
+          joinedAt: getNowInLocalTzISO()
         }),
 
       // Log the activity
@@ -163,7 +164,7 @@ export async function joinLeague(
           userId,
           action: 'joinedLeague',
           metadata: { skillTier, rank: nextRank },
-          createdAt: new Date().toISOString()
+          createdAt: getNowInLocalTzISO()
         })
     ])
 

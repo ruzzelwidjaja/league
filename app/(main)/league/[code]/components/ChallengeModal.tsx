@@ -10,7 +10,8 @@ import { sendChallenge } from "@/lib/actions/challenges";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import type { Json } from "@/lib/supabase/database.types";
-import { addDays, startOfDay, getDay } from "date-fns";
+import { addDays, startOfDay, getDay, format } from "date-fns";
+import { getNowInLocalTz } from "@/lib/utils";
 
 interface ChallengeModalProps {
   children: React.ReactNode;
@@ -168,7 +169,7 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
 
   // Get the dates for the current week view
   const getWeekDates = () => {
-    const today = startOfDay(new Date());
+    const today = startOfDay(getNowInLocalTz());
     
     // Calculate start of week (Monday) for the current offset
     const startOfWeek = addDays(today, -getDay(today) + 1 + (currentWeekOffset * 7));
@@ -184,7 +185,7 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
   const weekDates = getWeekDates();
   
   // Use local timezone - create date at start of day in local time
-  const today = startOfDay(new Date()); // This creates today at midnight in local timezone
+  const today = startOfDay(getNowInLocalTz()); // This creates today at midnight in local timezone
   
   // Allow selection from today up to 1 week ahead (6 days ahead, so 7 days total including today)
   const maxDate = addDays(today, 6);
@@ -203,7 +204,7 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
 
   // Check if a week has any available slots
   const hasAvailableSlots = (weekOffset: number) => {
-    const testToday = startOfDay(new Date());
+    const testToday = startOfDay(getNowInLocalTz());
     
     // Calculate start of week (Monday) for the given offset
     const testStartOfWeek = addDays(testToday, -getDay(testToday) + 1 + (weekOffset * 7));
@@ -227,11 +228,11 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
     if (!isDateSelectable(normalizedDate)) return;
 
     const dateInfo = getDateInfo(normalizedDate);
-    const slotId = `${normalizedDate.toISOString().split('T')[0]}-${timeSlot}`;
-    
+    const dateString = format(normalizedDate, 'yyyy-MM-dd');
+    const slotId = `${dateString}-${timeSlot}`;
     const newSlot: TimeSlot = {
       id: slotId,
-      date: normalizedDate.toISOString().split('T')[0],
+      date: dateString,
       day: dateInfo.dayLabel,
       slot: timeSlot
     };
@@ -250,7 +251,7 @@ function ChallengeModalContent({ challengedUser, currentUserAvailability, curren
     // Normalize date to start of day for consistent comparison
     const normalizedDate = startOfDay(date);
     
-    const slotId = `${normalizedDate.toISOString().split('T')[0]}-${timeSlot}`;
+    const slotId = `${format(normalizedDate, 'yyyy-MM-dd')}-${timeSlot}`;
     return selectedSlots.some(s => s.id === slotId);
   };
 

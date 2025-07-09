@@ -11,6 +11,8 @@ import {
   isSameWeek,
   addWeeks
 } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -29,7 +31,7 @@ export const formatChallengeSlot = (slotData: { date?: string; slot?: string }) 
   // Parse as local date to avoid timezone issues
   const date = new Date(slotData.date + 'T12:00:00');
   const time = formatSlotTime(slotData.slot);
-  const now = new Date();
+  const now = getNowInLocalTz();
   const daysDiff = differenceInDays(date, now);
   
   // Handle explicit cases first
@@ -95,3 +97,22 @@ export const acceptChallengeWhatsApp = (
 export function capitalizeFirstLetter(val: string) {
   return String(val).charAt(0).toUpperCase() + String(val).slice(1);
 }
+
+export const getLocalTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+export const getNowInLocalTz = (): Date => {
+  // Get current time in user's local timezone as a Date object
+  const timezone = getLocalTimezone();
+  const localISOString = formatInTimeZone(new Date(), timezone, "yyyy-MM-dd'T'HH:mm:ss.SSS");
+  return new Date(localISOString);
+};
+
+export const getNowInLocalTzISO = (): string => {
+  // Get current time as ISO string in local timezone for database storage
+  const timezone = getLocalTimezone();
+  return formatInTimeZone(new Date(), timezone, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx");
+};
+
+console.log('new date()-->', new Date().toISOString())
+console.log('getNowInLocalTzISO()-->', getNowInLocalTzISO())
+console.log('getNowInLocalTz()-->', getNowInLocalTz().toISOString())

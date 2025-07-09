@@ -1,9 +1,9 @@
 import React from "react";
-import { auth } from "@/lib/auth";
+import { requireVerifiedAuth } from "@/lib/session-utils";
 import { redirect } from "next/navigation";
 import UserDropdown from "./components/UserDropdown";
-import { headers } from "next/headers";
 import { getLeagueByCode, getUserMembershipData, getLeagueMembers, getDetailedChallenges } from "@/lib/actions/leagues";
+import { getNowInLocalTz } from "@/lib/utils";
 import { LeaguePreStart } from "./components/LeaguePreStart";
 import { PlayerRankCard } from "@/components/PlayerRankCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,18 +17,7 @@ interface LeaguePageProps {
 
 export default async function LeaguePage({ params }: LeaguePageProps) {
   const { code } = await params;
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user) {
-    redirect("/auth/signin");
-  }
-
-  // Check if email is verified
-  if (!session.user.emailVerified) {
-    redirect("/auth/signin?message=Please verify your email first");
-  }
+  const session = await requireVerifiedAuth();
 
   // Get league by code
   const { league, error: leagueError } = await getLeagueByCode(code);
@@ -65,7 +54,7 @@ export default async function LeaguePage({ params }: LeaguePageProps) {
 
   // Check if league has started
   const hasLeagueStarted = () => {
-    const now = new Date();
+    const now = getNowInLocalTz();
     const seasonStart = new Date(league.seasonStart);
     return now >= seasonStart;
   };

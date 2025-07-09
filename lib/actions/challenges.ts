@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import { createChallengeSchema, acceptChallengeSchema } from '@/lib/validations/challenges'
+import { getNowInLocalTzISO, getNowInLocalTz } from '@/lib/utils'
 
 interface ChallengeState {
   success: boolean
@@ -34,7 +35,7 @@ export async function sendChallenge(
   const rawData = {
     challengedId: formData.get('challengedId') as string,
     leagueId: formData.get('leagueId') as string,
-    proposedSlots: JSON.parse(formData.get('proposedSlots') as string || '[]')
+    proposedSlots: JSON.parse(formData.get('proposedSlots') as string || '[]') 
   };
 
   const validation = createChallengeSchema.safeParse(rawData);
@@ -185,7 +186,7 @@ export async function sendChallenge(
         challengedId,
         proposedSlots,
         status: 'pending',
-        createdAt: new Date().toISOString()
+        createdAt: getNowInLocalTzISO()
       })
       .select('id')
       .single();
@@ -212,7 +213,7 @@ export async function sendChallenge(
           challengerRank: challenger.rank,
           challengedRank: challenged.rank 
         },
-        createdAt: new Date().toISOString()
+        createdAt: getNowInLocalTzISO()
       });
 
     if (logError) {
@@ -322,7 +323,7 @@ export async function acceptChallenge(
       };
     }
 
-    const now = new Date().toISOString();
+    const now = getNowInLocalTzISO();
 
     // 7. Update challenge
     const { error: updateError } = await supabase
@@ -360,7 +361,7 @@ export async function acceptChallenge(
 
     // 9. Check if activity window needs reset (null or expired > 30 days)
     const needsReset = !member.activityWindowStart || 
-      (new Date().getTime() - new Date(member.activityWindowStart).getTime()) > (30 * 24 * 60 * 60 * 1000);
+      (getNowInLocalTz().getTime() - new Date(member.activityWindowStart).getTime()) > (30 * 24 * 60 * 60 * 1000);
 
     let memberUpdates: {
       activityWindowStart?: string;
